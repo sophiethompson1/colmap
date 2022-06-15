@@ -35,7 +35,7 @@ if(IS_MSVC)
 elseif(IS_GNU OR IS_CLANG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-    # We want c++14 mainly for supporting latest dependencies, but older GCC
+    # We want c++17 mainly for supporting latest dependencies, but older GCC
     # versions in combination with CUDA do not yet support it. In the worst
     # case, this will lead to compile errors and there is not much we can
     # do on the COLMAP side.
@@ -43,7 +43,7 @@ elseif(IS_GNU OR IS_CLANG)
        IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
     endif()
 endif()
 
