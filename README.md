@@ -1,6 +1,14 @@
 COLMAP
 ======
 
+Changes in this fork
+--------------------
+
+Removing this error 
+    error: ‘exclusive_scan’ is not a member of ‘std’
+By changing the c++ from 14 to 17
+
+
 About
 -----
 
