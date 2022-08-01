@@ -56,6 +56,7 @@ struct BitmapColor {
   BitmapColor();
   BitmapColor(const T gray);
   BitmapColor(const T r, const T g, const T b);
+  BitmapColor(const T r, const T g, const T b, const T x, const T y, const T z);
 
   template <typename D>
   BitmapColor<D> Cast() const;
@@ -70,6 +71,9 @@ struct BitmapColor {
   T r;
   T g;
   T b;
+  T x;
+  T y;
+  T z;
 };
 
 // Wrapper class around FreeImage bitmaps.
@@ -116,6 +120,7 @@ class Bitmap {
   // Check whether image is grey- or colorscale.
   inline bool IsRGB() const;
   inline bool IsGrey() const;
+  inline bool IsNorm() const;
 
   // Number of bytes required to store image.
   size_t NumBytes() const;
@@ -171,6 +176,7 @@ class Bitmap {
   Bitmap Clone() const;
   Bitmap CloneAsGrey() const;
   Bitmap CloneAsRGB() const;
+  Bitmap CloneAsNorm() const;
 
   // Clone metadata from this bitmap object to another target bitmap object.
   void CloneMetadata(Bitmap* target) const;
