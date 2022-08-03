@@ -742,6 +742,11 @@ __global__ void InitNormalMap(GpuMat<float> normal_map,
   }
 }
 
+__global__ void GetNormalMap(GpuMat<float> normal_map,
+                              GpuMat<curandState> rand_state_map) {
+  
+}
+
 // Rotate normals by 90deg around z-axis in counter-clockwise direction.
 __global__ void RotateNormalMap(GpuMat<float> normal_map) {
   const int row = blockDim.y * blockIdx.y + threadIdx.y;
@@ -1132,6 +1137,7 @@ __global__ void SweepFromTopToBottom(
   }
 }
 
+//TODO: this calls init workspace memory
 PatchMatchCuda::PatchMatchCuda(const PatchMatchOptions& options,
                                const PatchMatch::Problem& problem)
     : options_(options),
@@ -1645,6 +1651,7 @@ void PatchMatchCuda::InitWorkspaceMemory() {
 
   ComputeCudaConfig();
 
+  //TODO: 
   if (options_.geom_consistency) {
     const NormalMap& init_normal_map =
         problem_.normal_maps->at(problem_.ref_image_idx);
