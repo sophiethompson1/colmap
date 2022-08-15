@@ -188,6 +188,7 @@ class Bitmap {
   static bool IsPtrSupported(FIBITMAP* data);
 
   FIBitmapPtr data_;
+  FIBitmapPtr norm_data_;
   int width_;
   int height_;
   int channels_;
