@@ -48,6 +48,10 @@
 
 #include "util/string.h"
 
+#define RGB_MODE   2
+#define GREY_MODE  1
+#define XYZ_MODE   3
+
 namespace colmap {
 
 // Templated bitmap color class.
@@ -56,6 +60,7 @@ struct BitmapColor {
   BitmapColor();
   BitmapColor(const T gray);
   BitmapColor(const T r, const T g, const T b);
+  BitmapColor(const T r, const T g, const T b, const T x, const T y, const T z);
 
   template <typename D>
   BitmapColor<D> Cast() const;
@@ -70,6 +75,9 @@ struct BitmapColor {
   T r;
   T g;
   T b;
+  T x;
+  T y;
+  T z;
 };
 
 // Wrapper class around FreeImage bitmaps.
@@ -92,7 +100,7 @@ class Bitmap {
   Bitmap& operator=(Bitmap&& other);
 
   // Allocate bitmap by overwriting the existing data.
-  bool Allocate(const int width, const int height, const bool as_rgb);
+  bool Allocate(const int width, const int height, const int mode = RGB_MODE);
 
   // Deallocate the bitmap by releasing the existing data.
   void Deallocate();
@@ -116,6 +124,7 @@ class Bitmap {
   // Check whether image is grey- or colorscale.
   inline bool IsRGB() const;
   inline bool IsGrey() const;
+  inline bool IsXYZ() const;
 
   // Number of bytes required to store image.
   size_t NumBytes() const;
@@ -151,7 +160,8 @@ class Bitmap {
   bool ExifAltitude(double* altitude) const;
 
   // Read bitmap at given path and convert to grey- or colorscale.
-  bool Read(const std::string& path, const bool as_rgb = true);
+  // mode 2 = "rgb", 1 = "greyscale", 3 = "xyz"
+  bool Read(const std::string& path, const int mode = RGB_MODE);
 
   // Write image to file. Flags can be used to set e.g. the JPEG quality.
   // Consult the FreeImage documentation for all available flags.
@@ -170,6 +180,7 @@ class Bitmap {
   Bitmap Clone() const;
   Bitmap CloneAsGrey() const;
   Bitmap CloneAsRGB() const;
+  Bitmap CloneAsXYZ() const;
 
   // Clone metadata from this bitmap object to another target bitmap object.
   void CloneMetadata(Bitmap* target) const;
@@ -185,6 +196,7 @@ class Bitmap {
 
   static bool IsPtrGrey(FIBITMAP* data);
   static bool IsPtrRGB(FIBITMAP* data);
+  static bool IsPtrXYZ(FIBITMAP* data);
   static bool IsPtrSupported(FIBITMAP* data);
 
   FIBitmapPtr data_;
@@ -223,14 +235,18 @@ T2 BitmapColorCast(const T1 value) {
 }  // namespace internal
 
 template <typename T>
-BitmapColor<T>::BitmapColor() : r(0), g(0), b(0) {}
-
+BitmapColor<T>::BitmapColor() : r(0), g(0), b(0), x(0), y(0), z(0) {}
+// ST: Set these as 0 or same
 template <typename T>
-BitmapColor<T>::BitmapColor(const T gray) : r(gray), g(gray), b(gray) {}
-
+BitmapColor<T>::BitmapColor(const T gray) : r(gray), g(gray), b(gray), x(gray), y(gray), z(gray) {}
+// ST: Set these as rgb or 0
 template <typename T>
 BitmapColor<T>::BitmapColor(const T r, const T g, const T b)
-    : r(r), g(g), b(b) {}
+    : r(r), g(g), b(b), x(r), y(g), z(b) {}
+
+template <typename T>
+BitmapColor<T>::BitmapColor(const T r, const T g, const T b, const T x, const T y, const T z)
+    : r(r), g(g), b(b), x(x), y(y), z(z) {}
 
 template <typename T>
 template <typename D>
@@ -239,24 +255,31 @@ BitmapColor<D> BitmapColor<T>::Cast() const {
   color.r = internal::BitmapColorCast<T, D>(r);
   color.g = internal::BitmapColorCast<T, D>(g);
   color.b = internal::BitmapColorCast<T, D>(b);
+  color.r = internal::BitmapColorCast<T, D>(x);
+  color.g = internal::BitmapColorCast<T, D>(y);
+  color.b = internal::BitmapColorCast<T, D>(z);
   return color;
 }
 
+//ST: Should I make this equal or close to on the side of x, y and z
 template <typename T>
 bool BitmapColor<T>::operator==(const BitmapColor<T>& rhs) const {
-  return r == rhs.r && g == rhs.g && b == rhs.b;
+  return r == rhs.r && g == rhs.g && b == rhs.b && x == rhs.x && y == rhs.y && z == rhs.z;
 }
 
 template <typename T>
 bool BitmapColor<T>::operator!=(const BitmapColor<T>& rhs) const {
-  return r != rhs.r || g != rhs.g || b != rhs.b;
+  return r != rhs.r || g != rhs.g || b != rhs.b || x != rhs.x || y != rhs.y || z != rhs.z;
 }
 
 template <typename T>
 std::ostream& operator<<(std::ostream& output, const BitmapColor<T>& color) {
-  output << StringPrintf("RGB(%f, %f, %f)", static_cast<double>(color.r),
+  output << StringPrintf("RGBXYZ(%f, %f, %f, %f, %f, %f)", static_cast<double>(color.r),
                          static_cast<double>(color.g),
-                         static_cast<double>(color.b));
+                         static_cast<double>(color.b),
+                         static_cast<double>(color.x),
+                         static_cast<double>(color.y),
+                         static_cast<double>(color.z));
   return output;
 }
 
@@ -278,6 +301,8 @@ unsigned int Bitmap::ScanWidth() const {
 bool Bitmap::IsRGB() const { return channels_ == 3; }
 
 bool Bitmap::IsGrey() const { return channels_ == 1; }
+
+bool Bitmap::IsXYZ() const { return channels_ == 6; }
 
 }  // namespace colmap
 

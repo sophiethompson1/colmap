@@ -79,18 +79,25 @@ Bitmap& Bitmap::operator=(Bitmap&& other) {
   return *this;
 }
 
-bool Bitmap::Allocate(const int width, const int height, const bool as_rgb) {
+bool Bitmap::Allocate(const int width, const int height, const int mode) {
   FIBITMAP* data = nullptr;
   width_ = width;
   height_ = height;
-  if (as_rgb) {
+  if (mode == RGB_MODE) {
+    //for checking
     const int kNumBitsPerPixel = 24;
     data = FreeImage_Allocate(width, height, kNumBitsPerPixel);
     channels_ = 3;
-  } else {
+  } else if (mode == XYZ_MODE) {
+    const int kNumBitsPerPixel = 48;
+    data = FreeImage_Allocate(width, height, kNumBitsPerPixel);
+    channels_ = 6;
+  } else if (mode == GREY_MODE) {
     const int kNumBitsPerPixel = 8;
     data = FreeImage_Allocate(width, height, kNumBitsPerPixel);
     channels_ = 1;
+  } else { //ST: Checking that the above checks are working correctly
+    channels_ = -1;
   }
   data_ = FIBitmapPtr(data, &FreeImage_Unload);
   return data != nullptr;
@@ -111,6 +118,7 @@ size_t Bitmap::NumBytes() const {
   }
 }
 
+//ST: might have to do something with Freeimage
 std::vector<uint8_t> Bitmap::ConvertToRawBits() const {
   const unsigned int scan_width = ScanWidth();
   const unsigned int bpp = BitsPerPixel();
@@ -153,42 +161,58 @@ std::vector<uint8_t> Bitmap::ConvertToColMajorArray() const {
   return array;
 }
 
-bool Bitmap::GetPixel(const int x, const int y,
+bool Bitmap::GetPixel(const int i, const int j,
                       BitmapColor<uint8_t>* color) const {
-  if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+  if (i < 0 || i >= width_ || j < 0 || j >= height_) {
     return false;
   }
 
-  const uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - y);
+  const uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - j);
 
   if (IsGrey()) {
-    color->r = line[x];
+    color->r = line[i];
     return true;
   } else if (IsRGB()) {
-    color->r = line[3 * x + FI_RGBA_RED];
-    color->g = line[3 * x + FI_RGBA_GREEN];
-    color->b = line[3 * x + FI_RGBA_BLUE];
+    color->r = line[3 * i + FI_RGBA_RED];
+    color->g = line[3 * i + FI_RGBA_GREEN];
+    color->b = line[3 * i + FI_RGBA_BLUE];
+    return true;
+  } else if (IsXYZ()) {
+    color->r = line[6 * i + FI_RGBA_RED];
+    color->g = line[6 * i + FI_RGBA_GREEN];
+    color->b = line[6 * i + FI_RGBA_BLUE];
+    color->x = line[6 * i + FI_RGBA_RED];
+    color->y = line[6 * i + FI_RGBA_GREEN];
+    color->z = line[6 * i + FI_RGBA_BLUE];
     return true;
   }
 
   return false;
 }
 
-bool Bitmap::SetPixel(const int x, const int y,
+bool Bitmap::SetPixel(const int i, const int j,
                       const BitmapColor<uint8_t>& color) {
-  if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+  if (i < 0 || i >= width_ || j < 0 || j >= height_) {
     return false;
   }
 
-  uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - y);
+  uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - j);
 
   if (IsGrey()) {
-    line[x] = color.r;
+    line[i] = color.r;
     return true;
   } else if (IsRGB()) {
-    line[3 * x + FI_RGBA_RED] = color.r;
-    line[3 * x + FI_RGBA_GREEN] = color.g;
-    line[3 * x + FI_RGBA_BLUE] = color.b;
+    line[3 * i + FI_RGBA_RED] = color.r;
+    line[3 * i + FI_RGBA_GREEN] = color.g;
+    line[3 * i + FI_RGBA_BLUE] = color.b;
+    return true;
+  } else if (IsXYZ()) {
+    line[6 * i + FI_RGBA_RED] = color.r;
+    line[6 * i + FI_RGBA_GREEN] = color.g;
+    line[6 * i + FI_RGBA_BLUE] = color.b;
+    line[6 * i + FI_RGBA_RED] = color.x;
+    line[6 * i + FI_RGBA_GREEN] = color.y;
+    line[6 * i + FI_RGBA_BLUE] = color.z;
     return true;
   }
 
@@ -202,16 +226,24 @@ const uint8_t* Bitmap::GetScanline(const int y) const {
 }
 
 void Bitmap::Fill(const BitmapColor<uint8_t>& color) {
-  for (int y = 0; y < height_; ++y) {
-    uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - y);
-    for (int x = 0; x < width_; ++x) {
+  for (int j = 0; j < height_; ++j) {
+    uint8_t* line = FreeImage_GetScanLine(data_.get(), height_ - 1 - j);
+    for (int i = 0; i < width_; ++i) {
       if (IsGrey()) {
-        line[x] = color.r;
+        line[i] = color.r;
       } else if (IsRGB()) {
-        line[3 * x + FI_RGBA_RED] = color.r;
-        line[3 * x + FI_RGBA_GREEN] = color.g;
-        line[3 * x + FI_RGBA_BLUE] = color.b;
+        line[3 * i + FI_RGBA_RED] = color.r;
+        line[3 * i + FI_RGBA_GREEN] = color.g;
+        line[3 * i + FI_RGBA_BLUE] = color.b;
+      } else if (IsXYZ()) {
+        line[6 * i + FI_RGBA_RED] = color.r;
+        line[6 * i + FI_RGBA_GREEN] = color.g;
+        line[6 * i + FI_RGBA_BLUE] = color.b;
+        line[6 * i + FI_RGBA_RED] = color.x;
+        line[6 * i + FI_RGBA_GREEN] = color.y;
+        line[6 * i + FI_RGBA_BLUE] = color.z;
       }
+
     }
   }
 }
@@ -275,6 +307,36 @@ bool Bitmap::InterpolateBilinear(const double x, const double y,
     color->r = dy_1 * v0_r + dy * v1_r;
     color->g = dy_1 * v0_g + dy * v1_g;
     color->b = dy_1 * v0_b + dy * v1_b;
+    return true;
+  } else if (IsXYZ()) {
+    const uint8_t* p00 = &line0[6 * x0];
+    const uint8_t* p01 = &line0[6 * x1];
+    const uint8_t* p10 = &line1[6 * x0];
+    const uint8_t* p11 = &line1[6 * x1];
+
+    // Top row, column-wise linear interpolation.
+    const double v0_r = dx_1 * p00[FI_RGBA_RED] + dx * p01[FI_RGBA_RED];
+    const double v0_g = dx_1 * p00[FI_RGBA_GREEN] + dx * p01[FI_RGBA_GREEN];
+    const double v0_b = dx_1 * p00[FI_RGBA_BLUE] + dx * p01[FI_RGBA_BLUE];
+    const double v0_x = dx_1 * p00[3+FI_RGBA_RED] + dx * p01[3+FI_RGBA_RED];
+    const double v0_y = dx_1 * p00[3+FI_RGBA_GREEN] + dx * p01[3+FI_RGBA_GREEN];
+    const double v0_z = dx_1 * p00[3+FI_RGBA_BLUE] + dx * p01[3+FI_RGBA_BLUE];
+
+    // Bottom row, column-wise linear interpolation.
+    const double v1_r = dx_1 * p10[FI_RGBA_RED] + dx * p11[FI_RGBA_RED];
+    const double v1_g = dx_1 * p10[FI_RGBA_GREEN] + dx * p11[FI_RGBA_GREEN];
+    const double v1_b = dx_1 * p10[FI_RGBA_BLUE] + dx * p11[FI_RGBA_BLUE];
+    const double v1_x = dx_1 * p10[3+FI_RGBA_RED] + dx * p11[3+FI_RGBA_RED];
+    const double v1_y = dx_1 * p10[3+FI_RGBA_GREEN] + dx * p11[3+FI_RGBA_GREEN];
+    const double v1_z = dx_1 * p10[3+FI_RGBA_BLUE] + dx * p11[3+FI_RGBA_BLUE];
+
+    // Row-wise linear interpolation.
+    color->r = dy_1 * v0_r + dy * v1_r;
+    color->g = dy_1 * v0_g + dy * v1_g;
+    color->b = dy_1 * v0_b + dy * v1_b;
+    color->x = dy_1 * v0_x + dy * v1_x;
+    color->y = dy_1 * v0_y + dy * v1_y;
+    color->z = dy_1 * v0_z + dy * v1_z;
     return true;
   }
 
@@ -406,11 +468,17 @@ bool Bitmap::ExifAltitude(double* altitude) const {
   return false;
 }
 
-bool Bitmap::Read(const std::string& path, const bool as_rgb) {
+//where we are reading the file 
+//image path is ..../images/filename We can check if a normal one exists
+bool Bitmap::Read(const std::string& path, const int mode) {
   if (!ExistsFile(path)) {
     return false;
   }
+  if (mode == XYZ_MODE) {
 
+  }
+
+  
   const FREE_IMAGE_FORMAT format = FreeImage_GetFileType(path.c_str(), 0);
 
   if (format == FIF_UNKNOWN) {
@@ -424,7 +492,7 @@ bool Bitmap::Read(const std::string& path, const bool as_rgb) {
 
   data_ = FIBitmapPtr(fi_bitmap, &FreeImage_Unload);
 
-  if (!IsPtrRGB(data_.get()) && as_rgb) {
+  if (!IsPtrRGB(data_.get()) && mode == RGB_MODE) {
     FIBITMAP* converted_bitmap = FreeImage_ConvertTo24Bits(fi_bitmap);
     data_ = FIBitmapPtr(converted_bitmap, &FreeImage_Unload);
   } else if (!IsPtrGrey(data_.get()) && !as_rgb) {
