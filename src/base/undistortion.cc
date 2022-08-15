@@ -154,12 +154,15 @@ COLMAPUndistorter::COLMAPUndistorter(const UndistortCameraOptions& options,
                                      const Reconstruction& reconstruction,
                                      const std::string& image_path,
                                      const std::string& output_path,
+                                     const std::string& normal_path,
                                      const int num_patch_match_src_images,
                                      const CopyType copy_type,
-                                     const std::vector<image_t>& image_ids)
+                                     const std::vector<image_t>& image_ids
+                                     )
     : options_(options),
       image_path_(image_path),
       output_path_(output_path),
+      normal_path_(normal_path),
       copy_type_(copy_type),
       num_patch_match_src_images_(num_patch_match_src_images),
       reconstruction_(reconstruction),
@@ -187,6 +190,7 @@ void COLMAPUndistorter::Run() {
   if (image_ids_.empty()) {
     for (size_t i = 0; i < reconstruction_.NumRegImages(); ++i) {
       const image_t image_id = reconstruction_.RegImageIds().at(i);
+      //ST: Add normal id here?
       futures.push_back(
           thread_pool.AddTask(&COLMAPUndistorter::Undistort, this, image_id));
     }
@@ -244,9 +248,11 @@ bool COLMAPUndistorter::Undistort(const image_t image_id) const {
   Camera undistorted_camera;
 
   const std::string input_image_path = JoinPaths(image_path_, image.Name());
+  // ST: can get corresponding normal path using image path name
+  // Example of output_image_path = ../mesh_constructions/jay/jay_basic_1_3/dense/images/iPad_6.tif - this section is copying file (could copy normal files here maybe)
   const std::string output_image_path =
       JoinPaths(output_path_, "images", image.Name());
-
+  
   // Check if the image is already undistorted and copy from source if no
   // scaling is needed
   if (camera.IsUndistorted() && options_.max_image_size < 0 &&
@@ -262,7 +268,7 @@ bool COLMAPUndistorter::Undistort(const image_t image_id) const {
               << std::endl;
     return false;
   }
-
+  
   UndistortImage(options_, distorted_bitmap, camera, &undistorted_bitmap,
                  &undistorted_camera);
   return undistorted_bitmap.Write(output_image_path);

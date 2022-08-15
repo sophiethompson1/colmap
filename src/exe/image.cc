@@ -310,6 +310,7 @@ int RunImageRegistrator(int argc, char** argv) {
 int RunImageUndistorter(int argc, char** argv) {
   std::string input_path;
   std::string output_path;
+  std::string normal_path = "";
   std::string output_type = "COLMAP";
   std::string image_list_path;
   std::string copy_policy = "copy";
@@ -322,6 +323,8 @@ int RunImageUndistorter(int argc, char** argv) {
   options.AddImageOptions();
   options.AddRequiredOption("input_path", &input_path);
   options.AddRequiredOption("output_path", &output_path);
+  options.AddDefaultOption("normal_path",
+                           &normal_path);
   options.AddDefaultOption("output_type", &output_type,
                            "{COLMAP, PMVS, CMP-MVS}");
   options.AddDefaultOption("image_list_path", &image_list_path);
@@ -382,7 +385,7 @@ int RunImageUndistorter(int argc, char** argv) {
   if (output_type == "COLMAP") {
     undistorter.reset(new COLMAPUndistorter(
         undistort_camera_options, reconstruction, *options.image_path,
-        output_path, num_patch_match_src_images, copy_type, image_ids));
+        output_path, "", num_patch_match_src_images, copy_type, image_ids));
   } else if (output_type == "PMVS") {
     undistorter.reset(new PMVSUndistorter(undistort_camera_options,
                                           reconstruction, *options.image_path,

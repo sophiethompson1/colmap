@@ -763,7 +763,9 @@ class LikelihoodComputer {
 
 // Rotate normals by 90deg around z-axis in counter-clockwise direction.
 __global__ void InitNormalMap(GpuMat<float> normal_map,
-                              GpuMat<curandState> rand_state_map) {
+                              GpuMat<curandState> rand_state_map,
+                              const std::string& image_path) {
+  printf("This is being run");                              
   const int row = blockDim.y * blockIdx.y + threadIdx.y;
   const int col = blockDim.x * blockIdx.x + threadIdx.x;
   if (col < normal_map.GetWidth() && row < normal_map.GetHeight()) {
@@ -1674,6 +1676,7 @@ void PatchMatchCuda::InitWorkspaceMemory() {
     normal_map_->CopyToDevice(init_normal_map.GetPtr(),
                               init_normal_map.GetWidth() * sizeof(float));
   } else {
+    // ST: Do I knwo the image here
     InitNormalMap<<<elem_wise_grid_size_, elem_wise_block_size_>>>(
         *normal_map_, *rand_state_map_);
   }

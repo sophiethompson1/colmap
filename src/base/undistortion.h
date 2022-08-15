@@ -69,7 +69,9 @@ class COLMAPUndistorter : public Thread {
   COLMAPUndistorter(
       const UndistortCameraOptions& options,
       const Reconstruction& reconstruction, const std::string& image_path,
-      const std::string& output_path, const int num_related_images = 20,
+      const std::string& output_path,
+      const std::string& normal_path = "",
+      const int num_related_images = 20,
       const CopyType copy_type = CopyType::COPY,
       const std::vector<image_t>& image_ids = std::vector<image_t>());
 
@@ -84,6 +86,7 @@ class COLMAPUndistorter : public Thread {
   UndistortCameraOptions options_;
   const std::string image_path_;
   const std::string output_path_;
+  const std::string normal_path_;
   const CopyType copy_type_;
   const int num_patch_match_src_images_;
   const Reconstruction& reconstruction_;
