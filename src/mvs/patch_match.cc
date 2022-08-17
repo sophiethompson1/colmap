@@ -465,7 +465,7 @@ void PatchMatchController::ProcessProblem(const PatchMatchOptions& options,
   std::vector<NormalMap> normal_maps;
   if (options.geom_consistency) {
     depth_maps.resize(model.images.size());
-    normal_maps.resize(model.images.size());
+    normal_maps.resize(model.images.size()); //ST
   }
 
   problem.images = &images;
