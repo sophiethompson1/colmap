@@ -4,10 +4,12 @@ COLMAP
 Changes in this fork
 --------------------
 
-Removing this error 
-    error: ‘exclusive_scan’ is not a member of ‘std’
-By changing the c++ from 14 to 17
+Using a script like this in between image_undistorter and stereo
 
+for cam in photos:
+    comb_commands.append(['cp', '-f', f"{image_path}/normals/bins/{cam}.tif.photometric.bin", f"{const_path}/dense/stereo/normal_maps/{cam}.tif.photometric.bin"])
+
+This copies a photometric bin from where you have it stored into the stereo/normal_maps folder 
 
 About
 -----
