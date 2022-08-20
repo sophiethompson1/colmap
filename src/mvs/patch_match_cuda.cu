@@ -1670,31 +1670,29 @@ void PatchMatchCuda::InitWorkspaceMemory() {
 
   ComputeCudaConfig();
 
-  //if (options_.geom_consistency) {
-  //  const NormalMap& init_normal_map =
-  //      problem_.normal_maps->at(problem_.ref_image_idx);
-  //  normal_map_->CopyToDevice(init_normal_map.GetPtr(),
-  //                            init_normal_map.GetWidth() * sizeof(float));
-  //} else {
-  //  //InitNormalMap<<<elem_wise_grid_size_, elem_wise_block_size_>>>(
-  //  //    *normal_map_, *rand_state_map_);
-  //}
-
-  //Getting binary from the normal maps 
-  //const NormalMap& init_normal_map = problem_.normal_maps->at(problem_.ref_image_idx);
+  if (options_.geom_consistency) {
+    const NormalMap& init_normal_map =  problem_.normal_maps->at(problem_.ref_image_idx);
+    normal_map_->CopyToDevice(init_normal_map.GetPtr(), init_normal_map.GetWidth() * sizeof(float));
+    
+    const Image& image_src = problem_.images->at(problem_.ref_image_idx);
+    std::string image_path = image_src.GetPath();
+    
+    std::string end = ".photometric.bin";
+    int pos = image_path.find_last_of("/");
+    std::string image_folder = "images";
+    std::string normal_folder = "stereo/normal_maps";
+    std::string normals_path = image_path.c_str();
+    
+    normals_path.replace(pos - image_folder.length(), image_folder.length(), normal_folder);
+    normals_path.insert(normals_path.length(), end);
+    
+    normal_map_->Read(normals_path);
+  } else {
+    InitNormalMap<<<elem_wise_grid_size_, elem_wise_block_size_>>>(
+        *normal_map_, *rand_state_map_);
+  }
   
-  const Image& image_src = problem_.images->at(problem_.ref_image_idx);
-  std::string image_path = image_src.GetPath();
   
-  std::string end = ".photometric.bin";
-  int pos = image_path.find_last_of("/");
-  std::string image_folder = "images";
-  std::string normal_folder = "stereo/normal_maps";
-  std::string normals_path = image_path.c_str();
-  normals_path.replace(pos - image_folder.length(), image_folder.length(), normal_folder);
-  normals_path.insert(normals_path.length(), end);
-  
-  normal_map_->Read(normals_path);
 }
 
 void PatchMatchCuda::Rotate() {
