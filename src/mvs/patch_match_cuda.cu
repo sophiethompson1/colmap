@@ -469,6 +469,7 @@ struct PhotoConsistencyCostComputer {
         const float ref_color = local_ref_image.data[ref_image_idx];
         const float src_color = tex2DLayered(src_images_texture, norm_col_src,
                                              norm_row_src, src_image_idx);
+                                             //ST: This seems important
 
         const float bilateral_weight = bilateral_weight_computer_.Compute(
             row, col, ref_center_color, ref_color);
@@ -862,7 +863,7 @@ __global__ void SweepFromTopToBottom(
     const GpuMat<float> prev_sel_prob_map, const GpuMat<float> ref_sum_image,
     const GpuMat<float> ref_squared_sum_image, const SweepOptions options) {
   const int col = blockDim.x * blockIdx.x + threadIdx.x;
-
+  //printf("Im here5-sweepinggg"); this was printed a lot lol
   // Probability for boundary pixels.
   constexpr float kUniformProb = 0.5f;
 
@@ -1210,7 +1211,7 @@ void PatchMatchCuda::Run() {
       }                                                               \
     }                                                                 \
     break;
-
+  std::cout << "Im here1" << std::endl;
   switch (options_.window_step) {
     CASE_WINDOW_STEP(1)
     CASE_WINDOW_STEP(2)
@@ -1230,7 +1231,6 @@ DepthMap PatchMatchCuda::GetDepthMap() const {
 }
 
 NormalMap PatchMatchCuda::GetNormalMap() const {
-  //Overwrite here
   return NormalMap(normal_map_->CopyToMat());
 }
 
@@ -1268,7 +1268,7 @@ template <int kWindowSize, int kWindowStep>
 void PatchMatchCuda::RunWithWindowSizeAndStep() {
   // Wait for all initializations to finish.
   CUDA_SYNC_AND_CHECK();
-
+  std::cout << "Im here2" << std::endl;
   CudaTimer total_timer;
   CudaTimer init_timer;
 
@@ -1303,7 +1303,7 @@ void PatchMatchCuda::RunWithWindowSizeAndStep() {
   sweep_options.filter_min_num_consistent = options_.filter_min_num_consistent;
   sweep_options.filter_geom_consistency_max_cost =
       options_.filter_geom_consistency_max_cost;
-
+  // Ive gotten here ST
   for (int iter = 0; iter < options_.num_iterations; ++iter) {
     CudaTimer iter_timer;
 
@@ -1327,7 +1327,7 @@ void PatchMatchCuda::RunWithWindowSizeAndStep() {
           *normal_map_, *consistency_mask_, *sel_prob_map_,              \
           *prev_sel_prob_map_, *ref_image_->sum_image,                   \
           *ref_image_->squared_sum_image, sweep_options);
-
+      std::cout << "Im here3" << std::endl;
       if (last_sweep) {
         if (options_.filter) {
           consistency_mask_.reset(new GpuMat<uint8_t>(cost_map_->GetWidth(),
@@ -1338,6 +1338,8 @@ void PatchMatchCuda::RunWithWindowSizeAndStep() {
         if (options_.geom_consistency) {
           const bool kGeomConsistencyTerm = true;
           if (options_.filter) {
+            std::cout << "Im here3-withfilter" << std::endl;
+            //ST : goes through here
             const bool kFilterPhotoConsistency = true;
             const bool kFilterGeomConsistency = true;
             CALL_SWEEP_FUNC
@@ -1688,8 +1690,21 @@ void PatchMatchCuda::InitWorkspaceMemory() {
     
     normal_map_->Read(normals_path);
   } else {
-    InitNormalMap<<<elem_wise_grid_size_, elem_wise_block_size_>>>(
-        *normal_map_, *rand_state_map_);
+    const Image& image_src = problem_.images->at(problem_.ref_image_idx);
+    std::string image_path = image_src.GetPath();
+    
+    std::string end = ".photometric.bin";
+    int pos = image_path.find_last_of("/");
+    std::string image_folder = "images";
+    std::string normal_folder = "stereo/normal_maps";
+    std::string normals_path = image_path.c_str();
+    
+    normals_path.replace(pos - image_folder.length(), image_folder.length(), normal_folder);
+    normals_path.insert(normals_path.length(), end);
+    
+    normal_map_->Read(normals_path);
+    //InitNormalMap<<<elem_wise_grid_size_, elem_wise_block_size_>>>(
+    //    *normal_map_, *rand_state_map_);
   }
   
   
