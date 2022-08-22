@@ -126,8 +126,13 @@ void CLTexImage::InitTexture(int width, int height, int nchannel)
 
 void CLTexImage::InitPackedTex(int width, int height, int packed)
 {
-    if(packed) InitTexture((width + 1) >> 1, (height + 1) >> 1, 4);
-    else InitTexture(width, height, 1);
+    if(packed){
+        std::cout << "Initialising Texture 2" << std::endl;
+        InitTexture((width + 1) >> 1, (height + 1) >> 1, 4);
+    } else {
+        std::cout << "Initialising Texture 3" << std::endl;
+        InitTexture(width, height, 1);
+    }
 }
 
 void CLTexImage::SetPackedSize(int width, int height, int packed)

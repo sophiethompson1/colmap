@@ -192,6 +192,13 @@ bool ExtractSiftFeaturesGPU(const SiftExtractionOptions& options,
                             FeatureKeypoints* keypoints,
                             FeatureDescriptors* descriptors);
 
+// Extract CSIFT features for the given image on the GPU.
+// CSiftGPU must already be initialized using `CreateCSiftGPU`.
+bool ExtractCSiftFeaturesGPU(const SiftExtractionOptions& options,
+                            const Bitmap& bitmap, SiftGPU* sift_gpu,
+                            FeatureKeypoints* keypoints,
+                            FeatureDescriptors* descriptors);
+
 // Load keypoints and descriptors from text file in the following format:
 //
 //    LINE_0:            NUM_FEATURES DIM

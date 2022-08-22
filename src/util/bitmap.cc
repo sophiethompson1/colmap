@@ -488,14 +488,20 @@ bool Bitmap::Read(const std::string& path, const bool as_rgb) {
     return false;
   }
 
+  //Maybe here i could add normal stuff?
   data_ = FIBitmapPtr(fi_bitmap, &FreeImage_Unload);
 
-  if (!IsPtrRGB(data_.get()) && as_rgb) {
+  if (!IsPtrRGB(data_.get()) && as_rgb) { // its not coming in here
+    std::cout << "i dont think its coming here" << std::endl;
     FIBITMAP* converted_bitmap = FreeImage_ConvertTo24Bits(fi_bitmap);
     data_ = FIBitmapPtr(converted_bitmap, &FreeImage_Unload);
   } else if (!IsPtrGrey(data_.get()) && !as_rgb) {
+    std::cout << "converted grey" << std::endl;
     FIBITMAP* converted_bitmap = FreeImage_ConvertToGreyscale(fi_bitmap);
     data_ = FIBitmapPtr(converted_bitmap, &FreeImage_Unload);
+    
+  } else {
+    std::cout << "i dont know what this means but hope its good" << std::endl;
   }
 
   if (!IsPtrSupported(data_.get())) {

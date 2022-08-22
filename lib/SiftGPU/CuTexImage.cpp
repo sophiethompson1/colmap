@@ -121,9 +121,10 @@ void CuTexImage::SetImageSize(int width, int height)
 
 bool CuTexImage::InitTexture(int width, int height, int nchannel)
 {
+	//std::cout << "HELLO THIS IS init init Channel " << nchannel << std::endl;
 	_imgWidth = width;
 	_imgHeight = height;
-	_numChannel = min(max(nchannel, 1), 4);
+	_numChannel = min(max(nchannel, 1), 6);
 
 	const size_t size = width * height * _numChannel * sizeof(float);
 
@@ -156,6 +157,7 @@ bool CuTexImage::InitTexture(int width, int height, int nchannel)
 void CuTexImage::CopyFromHost(const void * buf)
 {
 	if(_cuData == NULL) return;
+	//printf("Copy from Host "); Goes here a lot 
 	cudaMemcpy( _cuData, buf, _imgWidth * _imgHeight * _numChannel * sizeof(float), cudaMemcpyHostToDevice);
 }
 

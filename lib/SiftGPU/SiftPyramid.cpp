@@ -48,13 +48,16 @@ using namespace std;
 
 void SiftPyramid::RunSIFT(GLTexInput*input)
 {
+	std::cout << "siftpyramid runsift " << std::endl;
+	//code gets here
     CleanupBeforeSIFT();
 
 	if(_existing_keypoints & SIFT_SKIP_FILTERING)
 	{
-
+			std::cout << "siftpyramid runsift 1" << std::endl;
 	}else
 	{
+		std::cout << "siftpyramid runsift 2" << std::endl;
 		GlobalUtil::StartTimer("Build    Pyramid");
 		BuildPyramid(input);
 		GlobalUtil::StopTimer();
@@ -63,7 +66,8 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 
 
 	if(_existing_keypoints)
-	{
+	{  //doesnt
+		std::cout << "siftpyramid runsift 3" << std::endl;
 		//existing keypoint list should at least have the locations and scale
 		GlobalUtil::StartTimer("Upload Feature List");
 		if(!(_existing_keypoints & SIFT_SKIP_FILTERING)) ComputeGradient();
@@ -71,7 +75,8 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 		GlobalUtil::StopTimer();
 		_timing[2] = GetElapsedTime();
 	}else
-	{
+	{ //gets here
+		std::cout << "siftpyramid runsift 4" << std::endl;
 
 		GlobalUtil::StartTimer("Detect Keypoints");
 		DetectKeypointsEX();
@@ -79,13 +84,15 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 		_timing[1] = GetElapsedTime();
 
 		if(GlobalUtil::_ListGenGPU ==1)
-		{
+		{ //gets hrer
+			std::cout << "siftpyramid runsift 5" << std::endl;
 			GlobalUtil::StartTimer("Get Feature List");
 			GenerateFeatureList();
 			GlobalUtil::StopTimer();
 
 		}else
-		{
+		{ //ST doesnt get here
+			//ST REMOVE std::cout << "siftpyramid runsift 6" << std::endl;
 			GlobalUtil::StartTimer("Transfer Feature List");
 			GenerateFeatureListCPU();
 			GlobalUtil::StopTimer();
@@ -97,10 +104,12 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 
 
 	if(_existing_keypoints& SIFT_SKIP_ORIENTATION)
-	{
+	{ //ST doesnt get here
+		// ST: REMOVE std::cout << "siftpyramid runsift 7" << std::endl;
 		//use exisitng feature orientation or
 	}else 	if(GlobalUtil::_MaxOrientation>0)
 	{
+		std::cout << "siftpyramid runsift 8" << std::endl; //gets here
 		//some extra tricks are done to handle existing keypoint list
 		GlobalUtil::StartTimer("Feature Orientations");
 		GetFeatureOrientations();
@@ -117,7 +126,8 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 			_timing[4] = GetElapsedTime();
 		}
 	}else
-	{
+	{ // doesnt get here ST
+		//ST: REMOVE std::cout << "siftpyramid runsift 9" << std::endl;
 		GlobalUtil::StartTimer("Feature Orientations");
 		GetSimplifiedOrientation();
 		GlobalUtil::StopTimer();
@@ -131,6 +141,7 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 		//no need to read back feature if all fields of keypoints are already specified
 	}else
 	{
+		std::cout << "siftpyramid runsift 10" << std::endl; //gets here
 		GlobalUtil::StartTimer("Download Keypoints");
 #ifdef NO_DUPLICATE_DOWNLOAD
 		if(GlobalUtil::_MaxOrientation < 2 || GlobalUtil::_FixedOrientation)
@@ -144,6 +155,7 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 
 	if(GlobalUtil::_DescriptorPPT)
 	{
+		std::cout << "siftpyramid runsift 11" << std::endl; //gets here
 		//desciprotrs are downloaded in descriptor computation of each level
 		GlobalUtil::StartTimer("Get Descriptor");
 		GetFeatureDescriptors();
@@ -154,9 +166,11 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 	//reset the existing keypoints
 	_existing_keypoints = 0;
 	_keypoint_index.resize(0);
+	std::cout << "siftpyramid runsift 13" << std::endl;
 
     if(GlobalUtil::_UseSiftGPUEX)
-	{
+	{ //ST: doesnt go here
+		//ST: REMOVE std::cout << "siftpyramid runsift 12" << std::endl;
 		GlobalUtil::StartTimer("Gen. Display VBO");
 		GenerateFeatureDisplayVBO();
 		GlobalUtil::StopTimer();
@@ -164,6 +178,7 @@ void SiftPyramid::RunSIFT(GLTexInput*input)
 	}
     //clean up
     CleanUpAfterSIFT();
+		std::cout << "siftpyramid runsift SIFT done" << std::endl;
 }
 
 

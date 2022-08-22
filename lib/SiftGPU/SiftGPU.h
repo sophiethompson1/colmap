@@ -137,6 +137,8 @@ protected:
 	int		_image_loaded;
 	//the name of current input image
 	char*	_imgpath;
+	//the name of current input normal
+	char*	_normpath;
 	//_outpath containes the name of the output file
 	char*	_outpath;
 	//the list of image filenames

@@ -129,9 +129,12 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
   // Read image.
   //////////////////////////////////////////////////////////////////////////////
 
-  if (!bitmap->Read(image_path, false)) {
+  //change as_rgb to true
+  if (!bitmap->Read(image_path, true)) {
     return Status::BITMAP_ERROR;
   }
+  std::cout << "DID THIS JUST TELL IT TO GO IN GREY" << std::endl;
+  //No longer forcing it to go grey
 
   //////////////////////////////////////////////////////////////////////////////
   // Read mask.
@@ -152,6 +155,7 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
   //////////////////////////////////////////////////////////////////////////////
 
   if (exists_image) {
+    std::cout << "image exist" << std::endl;
     const Camera current_camera = database_->ReadCamera(image->CameraId());
 
     if (options_.single_camera && prev_camera_.CameraId() != kInvalidCameraId &&

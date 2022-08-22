@@ -388,26 +388,32 @@ void SiftFeatureExtractorThread::Run() {
         bool success = false;
         if (sift_options_.estimate_affine_shape ||
             sift_options_.domain_size_pooling) {
+          std::cout << "Sift1" << std::endl;
           success = ExtractCovariantSiftFeaturesCPU(
               sift_options_, image_data.bitmap, &image_data.keypoints,
               &image_data.descriptors);
         } else if (sift_options_.use_gpu) {
-          success = ExtractSiftFeaturesGPU(
+          std::cout << "Sift2" << std::endl;
+          success = ExtractCSiftFeaturesGPU(
               sift_options_, image_data.bitmap, sift_gpu.get(),
               &image_data.keypoints, &image_data.descriptors);
         } else {
+          std::cout << "Sift3" << std::endl;
           success = ExtractSiftFeaturesCPU(sift_options_, image_data.bitmap,
                                            &image_data.keypoints,
                                            &image_data.descriptors);
         }
         if (success) {
+          std::cout << "Sift4" << std::endl;
           ScaleKeypoints(image_data.bitmap, image_data.camera,
                          &image_data.keypoints);
           if (camera_mask_) {
+            std::cout << "Sift5" << std::endl;
             MaskKeypoints(*camera_mask_, &image_data.keypoints,
                           &image_data.descriptors);
           }
           if (image_data.mask.Data()) {
+            std::cout << "Sift6" << std::endl;
             MaskKeypoints(image_data.mask, &image_data.keypoints,
                           &image_data.descriptors);
           }

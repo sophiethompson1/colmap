@@ -81,6 +81,7 @@ void PyramidCL::InitializeContext()
 
 void PyramidCL::InitPyramid(int w, int h, int ds)
 {
+	std::cout << "pyramidcli init " << std::endl;
 	int wp, hp, toobig = 0;
 	if(ds == 0)
 	{
@@ -868,7 +869,7 @@ void PyramidCL::ConvertInputToCL(GLTexInput* input, CLTexImage* output)
     if(input->_pixel_data)
     {
         output->InitTexture(ws, hs, 1);
-        output->CopyFromHost(input->_pixel_data); 
+      output->CopyFromHost(input->_pixel_data); 
     }else /*if(input->_rgb_converted && input->CopyToPBO(_bufferPBO, ws, hs, GL_LUMINANCE))
     {
 		output->InitTexture(ws, hs, 1);

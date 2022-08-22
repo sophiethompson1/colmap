@@ -79,6 +79,7 @@ void CuTexImage::SwapData(CuTexImage& src) {
 
 bool CuTexImage::InitTexture(unsigned int width, unsigned int height,
                              unsigned int nchannel) {
+  std::cout << "Initialising texture fnc" << std::endl; //ST isnt happening
   size_t size = sizeof(float) * width * height * nchannel;
   _imgWidth = width;
   _imgHeight = height;
@@ -97,6 +98,7 @@ bool CuTexImage::InitTexture(unsigned int width, unsigned int height,
 
 void CuTexImage::SetTexture(void* data, unsigned int width,
                             unsigned int nchannel) {
+  std::cout << "Setting texture fnc" << std::endl; //ST isnt happening
   if (_cuData && _owner) cudaFree(_cuData);
   _imgWidth = width;
   _imgHeight = 1;

@@ -861,10 +861,72 @@ bool ExtractSiftFeaturesGPU(const SiftExtractionOptions& options,
 
   std::unique_lock<std::mutex> lock(
       *sift_extraction_mutexes[sift_gpu->gpu_index]);
-
+  std::cout << "Sift10" << std::endl;
   // Note, that this produces slightly different results than using SiftGPU
   // directly for RGB->GRAY conversion, since it uses different weights.
   const std::vector<uint8_t> bitmap_raw_bits = bitmap.ConvertToRawBits();
+  //ST: This is where it starts?? 
+  const int code =
+      sift_gpu->RunSIFT(bitmap.ScanWidth(), bitmap.Height(),
+                        bitmap_raw_bits.data(), GL_LUMINANCE, GL_UNSIGNED_BYTE);
+
+  const int kSuccessCode = 1;
+  if (code != kSuccessCode) {
+    return false;
+  }
+
+  const size_t num_features = static_cast<size_t>(sift_gpu->GetFeatureNum());
+
+  std::vector<SiftKeypoint> keypoints_data(num_features);
+
+  // Eigen's default is ColMajor, but SiftGPU stores result as RowMajor.
+  Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+      descriptors_float(num_features, 128);
+
+  // Download the extracted keypoints and descriptors.
+  sift_gpu->GetFeatureVector(keypoints_data.data(), descriptors_float.data());
+
+  keypoints->resize(num_features);
+  for (size_t i = 0; i < num_features; ++i) {
+    (*keypoints)[i] = FeatureKeypoint(keypoints_data[i].x, keypoints_data[i].y,
+                                      keypoints_data[i].s, keypoints_data[i].o);
+  }
+
+  // Save and normalize the descriptors.
+  if (options.normalization == SiftExtractionOptions::Normalization::L2) {
+    descriptors_float = L2NormalizeFeatureDescriptors(descriptors_float);
+  } else if (options.normalization ==
+             SiftExtractionOptions::Normalization::L1_ROOT) {
+    descriptors_float = L1RootNormalizeFeatureDescriptors(descriptors_float);
+  } else {
+    LOG(FATAL) << "Normalization type not supported";
+  }
+
+  *descriptors = FeatureDescriptorsToUnsignedByte(descriptors_float);
+
+  return true;
+}
+
+bool ExtractCSiftFeaturesGPU(const SiftExtractionOptions& options,
+                            const Bitmap& bitmap, SiftGPU* sift_gpu,
+                            FeatureKeypoints* keypoints,
+                            FeatureDescriptors* descriptors) {
+  CHECK(options.Check());
+  //CHECK(bitmap.IsGrey());
+  CHECK_NOTNULL(keypoints);
+  CHECK_NOTNULL(descriptors);
+  CHECK_EQ(options.max_image_size, sift_gpu->GetMaxDimension());
+
+  CHECK(!options.estimate_affine_shape);
+  CHECK(!options.domain_size_pooling);
+
+  std::unique_lock<std::mutex> lock(
+      *sift_extraction_mutexes[sift_gpu->gpu_index]);
+  std::cout << "Sift10" << std::endl;
+  // Note, that this produces slightly different results than using SiftGPU
+  // directly for RGB->GRAY conversion, since it uses different weights.
+  const std::vector<uint8_t> bitmap_raw_bits = bitmap.ConvertToRawBits();
+  //ST: This is where it starts?? 
   const int code =
       sift_gpu->RunSIFT(bitmap.ScanWidth(), bitmap.Height(),
                         bitmap_raw_bits.data(), GL_LUMINANCE, GL_UNSIGNED_BYTE);

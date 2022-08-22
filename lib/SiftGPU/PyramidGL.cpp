@@ -307,6 +307,7 @@ void PyramidNaive::FitPyramid(int w, int h)
 }
 void PyramidNaive::InitPyramid(int w, int h, int ds)
 {
+	std::cout << "pyramidgl naive init " << std::endl;
 	int wp, hp, toobig = 0;
 	if(ds == 0)
 	{
@@ -589,6 +590,7 @@ int PyramidGL::ResizeFeatureStorage()
 
 void PyramidNaive::BuildPyramid(GLTexInput *input)
 {
+	std::cout << "Pyramid Naive Build" << std::endl;
 	USE_TIMING();
 	GLTexPacked * tex;
 	FilterProgram** filter;
@@ -727,6 +729,7 @@ void PyramidNaive::ComputeGradient()
 //keypoint detection with subpixel localization
 void PyramidNaive::DetectKeypointsEX()
 {
+	std::cout << "detect keypoints pyramid naive " << std::endl;
 	int i, j;
 	double t0, t, ts, t1, t2;
 	GLTexImage * tex, *aux;
@@ -1948,6 +1951,7 @@ PyramidPacked::~PyramidPacked()
 
 void PyramidPacked::BuildPyramid(GLTexInput * input)
 {
+	std::cout << "Pyramid Packed Build" << std::endl;
 	//
 	USE_TIMING();
 	GLTexImage * tex, *tmp;
@@ -2051,7 +2055,7 @@ void PyramidPacked::ComputeGradient()
 
 void PyramidPacked::DetectKeypointsEX()
 {
-
+	std::cout << "detect keypoints pyramid packed " << std::endl;
 	//first pass, compute dog, gradient, orientation
 	GLenum buffers[4] = { 
 		GL_COLOR_ATTACHMENT0_EXT,		GL_COLOR_ATTACHMENT1_EXT ,
@@ -2539,6 +2543,7 @@ void PyramidPacked::GetSimplifiedOrientation()
 
 void PyramidPacked::InitPyramid(int w, int h, int ds)
 {
+	std::cout << "pyramidgl packed init " << std::endl;
 	int wp, hp, toobig = 0;
 	if(ds == 0)
 	{

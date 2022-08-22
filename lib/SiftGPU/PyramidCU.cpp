@@ -85,9 +85,12 @@ void PyramidCU::InitializeContext()
 
 void PyramidCU::InitPyramid(int w, int h, int ds)
 {
+	std::cout << "pyramidcu init " << std::endl;
+	// gets here
 	int wp, hp, toobig = 0;
 	if(ds == 0)
 	{
+		std::cout << "pyramidcu init ds = 0" << std::endl;
 		//
 		TruncateWidth(w);
 		////
@@ -107,6 +110,7 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 		_octave_min = _octave_min_default;
 	}else
 	{
+		std::cout << "pyramidcu init ds != 0" << std::endl; 
 		//must use 0 as _octave_min; 
 		_octave_min = 0;
 		_down_sample_factor = ds;
@@ -123,6 +127,7 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 
 	while(wp > GlobalUtil::_texMaxDim  || hp > GlobalUtil::_texMaxDim )
 	{
+		//std::cout << "pyramidcu init idk what is happening" << std::endl; goes here ST
 		_octave_min ++;
 		wp >>= 1;
 		hp >>= 1;
@@ -132,6 +137,7 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 	while(GlobalUtil::_MemCapGPU > 0 && GlobalUtil::_FitMemoryCap &&  (wp >_pyramid_width || hp > _pyramid_height)&& 
 		max(max(wp, hp), max(_pyramid_width, _pyramid_height)) >  1024 * sqrt(GlobalUtil::_MemCapGPU / 110.0))
 	{
+		std::cout << "pyramidcu init idk2" << std::endl;
 		_octave_min ++;
 		wp >>= 1;
 		hp >>= 1;
@@ -166,6 +172,7 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 
 void PyramidCU::ResizePyramid(int w, int h)
 {
+	std::cout << "pyramidcu init resize pyramid" << std::endl;
 	//
 	unsigned int totalkb = 0;
 	int _octave_num_new, input_sz, i, j;
@@ -257,6 +264,7 @@ void PyramidCU::ResizePyramid(int w, int h)
 
 void PyramidCU::FitPyramid(int w, int h)
 {
+	std::cout << "pyramidcu init fit pyramid" << std::endl;
 	_pyramid_octave_first = 0;
 	//
 	_octave_num  = GlobalUtil::_octave_num_default;
@@ -924,15 +932,19 @@ GLTexImage* PyramidCU::GetLevelTexture(int octave, int level, int dataName)
 
 void PyramidCU::ConvertInputToCU(GLTexInput* input)
 {
+	std::cout << "converting input to cu" << std::endl;
 	int ws = input->GetImgWidth(), hs = input->GetImgHeight();
 	TruncateWidth(ws);
 	//copy the input image to pixel buffer object
     if(input->_pixel_data)
     {
+				std::cout << "converting input to cu2 width" << ws << " height " << hs << std::endl;
+				// width is the whole image, height is whole image, why 1 channel??
         _inputTex->InitTexture(ws, hs, 1);
         _inputTex->CopyFromHost(input->_pixel_data); 
     }else
-    {
+    { //doesnt go here
+				//ST REMOVE std::cout << "converting input to cu3" << std::endl;
         if(_bufferPBO == 0) glGenBuffers(1, &_bufferPBO);
         if(input->_rgb_converted && input->CopyToPBO(_bufferPBO, ws, hs, GL_LUMINANCE))
         {
@@ -952,7 +964,7 @@ void PyramidCU::ConvertInputToCU(GLTexInput* input)
 
 void PyramidCU::BuildPyramid(GLTexInput * input)
 {
-
+	std::cout << "Build Pyramid CU" << std::endl;
 	USE_TIMING();
 
 	int i, j;
@@ -1007,7 +1019,7 @@ void PyramidCU::BuildPyramid(GLTexInput * input)
 void PyramidCU::DetectKeypointsEX()
 {
 
-
+	std::cout << "PyramidCu Detect keypoints" << std::endl;
 	int i, j;
 	double t0, t, ts, t1, t2;
 
@@ -1015,6 +1027,7 @@ void PyramidCU::DetectKeypointsEX()
 
 	for(i = _octave_min; i < _octave_min + _octave_num; i++)
 	{
+		std::cout << "PyramidCu Detect keypoints for loop" << std::endl;
 		CuTexImage * gus = GetBaseLevel(i) + 1;
 		CuTexImage * dog = GetBaseLevel(i, DATA_DOG) + 1;
 		CuTexImage * got = GetBaseLevel(i, DATA_GRAD) + 1;
@@ -1027,13 +1040,15 @@ void PyramidCU::DetectKeypointsEX()
 		}
 	}
 	if(GlobalUtil::_timingS && GlobalUtil::_verbose)
-	{
+	{ //doesnt go here
 		ProgramCU::FinishCUDA();
 		t1 = CLOCK();
+		//ST REMOVE std::cout << "PyramidCu Detect keypoints if1" << std::endl;
 	}
 
 	for ( i = _octave_min; i < _octave_min + _octave_num; i++)
 	{
+		std::cout << "PyramidCu Detect keypoints for loop2" << std::endl;
 		if(GlobalUtil::_timingO)
 		{
 			t0 = CLOCK();

@@ -132,6 +132,7 @@ SiftGPU::~SiftGPU()
 	delete _texImage;
 	delete _list;
     delete[] _imgpath;
+		delete[] _normpath;
     delete[] _outpath;
 }
 
@@ -222,6 +223,7 @@ int	 SiftGPU::RunSIFT(int index)
 
 int  SiftGPU::RunSIFT( int width,  int height, const void * data, unsigned int gl_format, unsigned int gl_type)
 {
+	std::cout << "SiftRunning" << std::endl; //gets here
 
 	if(GlobalUtil::_GoodOpenGL ==0 ) return 0;
 	if(!_initialized) InitSiftGPU();
@@ -234,7 +236,7 @@ int  SiftGPU::RunSIFT( int width,  int height, const void * data, unsigned int g
 		//try downsample the image on CPU
 		GlobalUtil::StartTimer("Upload Image data");
 		if(_texImage->SetImageData(width, height, data, gl_format, gl_type))
-		{
+		{	//NOT SURE WHATS GOING ON HERE
 			_image_loaded = 2; //gldata;
 			GlobalUtil::StopTimer();
 			_timing[0] = GlobalUtil::GetElapsedTime();
@@ -282,6 +284,8 @@ int SiftGPU::RunSIFT(int num, const SiftKeypoint * keys, int keys_have_orientati
 
 int SiftGPU::RunSIFT()
 {
+	//std::cout << "Runing sift no parameters Image loaded" << _image_loaded << std::endl;
+	//always image_loaded=2
 	//check image data
 	if(_imgpath[0]==0 && _image_loaded == 0) return 0;
 
@@ -293,6 +297,7 @@ int SiftGPU::RunSIFT()
 	if(!_initialized)
 	{
 	    //initialize SIFT GPU for once
+		std::cout << "Runing sift no parameters - not initialised" << std::endl;
 		InitSiftGPU();
 		if(GlobalUtil::_GoodOpenGL ==0 ) return 0;
 	}else
@@ -301,14 +306,19 @@ int SiftGPU::RunSIFT()
 		GlobalUtil::SetGLParam();
 	}
 
+	std::cout << "Runing sift no parameters -after if statement" << std::endl;
 	timer.StartTimer("RUN SIFT");
 	//process input image file
 	if( _image_loaded ==0)
-	{
+	{ // ST: doesnt go in here
 		int width, height;
 		//load and try down-sample on cpu
+		// ST: REMOVE std::cout << "SiftGPURUN" << std::endl;
+		
 		GlobalUtil::StartTimer("Load Input Image");
+
 		if(!_texImage->LoadImageFile(_imgpath, width, height)) return 0;
+		
 		_image_loaded = 1;
 		GlobalUtil::StopTimer();
 		_timing[0] = GlobalUtil::GetElapsedTime();
@@ -324,15 +334,18 @@ int SiftGPU::RunSIFT()
 		//change some global states
         if(!GlobalUtil::_UseCUDA && !GlobalUtil::_UseOpenCL)
 		{
+			std::cout << "Siftteximage" << std::endl;
 			GlobalUtil::FitViewPort(1,1);
 			_texImage->FitTexViewPort();
 		}
 		if(_image_loaded == 1)
 		{
+			std::cout << "loaded is 1" << std::endl;
 			_timing[0] = _timing[1] = 0;
 		}else
 		{//2
 			_image_loaded = 1;
+			std::cout << "else vibes" << std::endl;
 		}
 	}
 
@@ -1179,7 +1192,6 @@ void SiftGPU:: LoadImageList(const char *imlist)
 		_list->push_back(filename);
 	}
 	in.close();
-
 
 	if(_list->size()>0)
 	{

@@ -490,15 +490,19 @@ void __global__ ComputeDOG_Kernel(float* d_dog, int width, int height)
 
 void ProgramCU::ComputeDOG(CuTexImage* gus, CuTexImage* dog, CuTexImage* got)
 {
+	//printf("COMPUTE DOG CU");
 	int width = gus->GetImgWidth(), height = gus->GetImgHeight();
 	dim3 grid((width + DOG_BLOCK_DIMX - 1)/ DOG_BLOCK_DIMX,  (height + DOG_BLOCK_DIMY - 1)/DOG_BLOCK_DIMY);
 	dim3 block(DOG_BLOCK_DIMX, DOG_BLOCK_DIMY);
 	gus->BindTexture(texC);
 	(gus -1)->BindTexture(texP);
-	if(got->_cuData)
+	if(got->_cuData) {
+		//printf("COMPUTE DOG CU data");
 		ComputeDOG_Kernel<<<grid, block>>>((float*) dog->_cuData, (float2*) got->_cuData, width, height);
-	else
+	}	else {
+		//printf("COMPUTE DOG CU nodata");
 		ComputeDOG_Kernel<<<grid, block>>>((float*) dog->_cuData, width, height);
+	}	
 }
 
 
@@ -641,6 +645,7 @@ key_finish:
 
 void ProgramCU::ComputeKEY(CuTexImage* dog, CuTexImage* key, float Tdog, float Tedge)
 {
+	printf("COMpute key CU");
 	int width = dog->GetImgWidth(), height = dog->GetImgHeight();
 	float Tdog1 = (GlobalUtil::_SubpixelLocalization? 0.8f : 1.0f) * Tdog;
 	CuTexImage* dogp = dog - 1;
