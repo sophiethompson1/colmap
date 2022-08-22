@@ -865,7 +865,7 @@ bool ExtractSiftFeaturesGPU(const SiftExtractionOptions& options,
   // Note, that this produces slightly different results than using SiftGPU
   // directly for RGB->GRAY conversion, since it uses different weights.
   const std::vector<uint8_t> bitmap_raw_bits = bitmap.ConvertToRawBits();
-  //ST: This is where it starts?? 
+  //ST: This is where it starts?? .
   const int code =
       sift_gpu->RunSIFT(bitmap.ScanWidth(), bitmap.Height(),
                         bitmap_raw_bits.data(), GL_LUMINANCE, GL_UNSIGNED_BYTE);

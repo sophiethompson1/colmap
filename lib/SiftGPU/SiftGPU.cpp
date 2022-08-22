@@ -232,6 +232,7 @@ int  SiftGPU::RunSIFT( int width,  int height, const void * data, unsigned int g
 
 	if(width > 0 && height >0 && data != NULL)
 	{
+		//ST: DATA IS ? img path is about to be deld
 		_imgpath[0] = 0;
 		//try downsample the image on CPU
 		GlobalUtil::StartTimer("Upload Image data");

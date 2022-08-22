@@ -89,8 +89,8 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 	// gets here
 	int wp, hp, toobig = 0;
 	if(ds == 0)
-	{
-		std::cout << "pyramidcu init ds = 0" << std::endl;
+	{ // gets here
+		// ST REMOVE std::cout << "pyramidcu init ds = 0" << std::endl;
 		//
 		TruncateWidth(w);
 		////
@@ -109,8 +109,8 @@ void PyramidCU::InitPyramid(int w, int h, int ds)
 		}
 		_octave_min = _octave_min_default;
 	}else
-	{
-		std::cout << "pyramidcu init ds != 0" << std::endl; 
+	{ //doesnt get here
+		//St REMOVE std::cout << "pyramidcu init ds != 0" << std::endl; 
 		//must use 0 as _octave_min; 
 		_octave_min = 0;
 		_down_sample_factor = ds;
