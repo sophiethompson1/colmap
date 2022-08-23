@@ -83,8 +83,8 @@ ImageReader::ImageReader(const ImageReaderOptions& options, Database* database)
   }
 }
 
-ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
-                                      Bitmap* bitmap, Bitmap* mask) {
+ImageReader::Status ImageReader::Next(Camera* camera, Image* image, Image* norm,
+                                      Bitmap* bitmap, Bitmap* bitmapnorm, Bitmap* mask) {
   CHECK_NOTNULL(camera);
   CHECK_NOTNULL(image);
   CHECK_NOTNULL(bitmap);
@@ -93,6 +93,13 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
   CHECK_LE(image_index_, options_.image_list.size());
 
   const std::string image_path = options_.image_list.at(image_index_ - 1);
+
+  //std::cout << "Image path is " << image_path << std::endl;
+  std::string norm_path = image_path.c_str();
+  std::string img_f = "images";
+  int pos = image_path.find_last_of("/"); 
+  norm_path.replace(pos - img_f.length(), img_f.length(), "normals");
+  //std::cout << "Norm path is " << norm_path << std::endl;
 
   DatabaseTransaction database_transaction(database_);
 
