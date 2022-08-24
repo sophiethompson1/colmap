@@ -698,59 +698,21 @@ void Database::AppendKeypoints(const image_t image_id,
 
   fks.insert(fks.end(), fk.begin(), fk.end());
   fks.insert(fks.end(), keypoints.begin(), keypoints.end());
-  
-  //Delete old entry
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_delete_keypoints_, 1, image_id));
-  SQLITE3_CALL(sqlite3_step(sql_stmt_delete_keypoints_));
-  SQLITE3_CALL(sqlite3_reset(sql_stmt_delete_keypoints_));
 
   const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(fks);
   std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
 
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_keypoints_, 1, image_id));
-  WriteDynamicMatrixBlob(sql_stmt_write_keypoints_, blob, 2);
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_keypoints_, 2, image_id));
+  WriteDynamicMatrixBlob(sql_stmt_update_keypoints_, blob, 1);
 
-  SQLITE3_CALL(sqlite3_step(sql_stmt_write_keypoints_));
-  SQLITE3_CALL(sqlite3_reset(sql_stmt_write_keypoints_));
+  SQLITE3_CALL(sqlite3_step(sql_stmt_update_keypoints_));
+  SQLITE3_CALL(sqlite3_reset(sql_stmt_update_keypoints_));
 }
 
 void Database::WriteDescriptors(const image_t image_id,
                                 const FeatureDescriptors& descriptors) const {
-  std::cout << "Im writing in the keypoints for "<< image_id << " thats the image id" << std::endl;
-  uint32_t temp = 15;
-  uint32_t new_id = image_id;
-  if (image_id > temp) {
-    std::cout << "Bigger than 15" << std::endl;
-    new_id = new_id - temp;
-    const image_t nextone = new_id;
-    AppendDescriptors(nextone, descriptors);
-  } else {
-    SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_descriptors_, 1, image_id));
-    WriteDynamicMatrixBlob(sql_stmt_write_descriptors_, descriptors, 2);
-
-    SQLITE3_CALL(sqlite3_step(sql_stmt_write_descriptors_));
-    SQLITE3_CALL(sqlite3_reset(sql_stmt_write_descriptors_));
-  }
-}
-
-void Database::AppendDescriptors(const image_t image_id,
-                                const FeatureDescriptors& descriptors) const {
-  //
-  FeatureDescriptors fk = ReadDescriptors(image_id);
-  //Append keypoints together
-  
-  FeatureDescriptors fds; //this is matrix EEK complex
-
-  fds.insert(fds.end(), fk.begin(), fk.end());
-  fds.insert(fds.end(), descriptors.begin(), descriptors.end());
-  
-  //Delete old entry
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_delete_descriptors_, 1, image_id));
-  SQLITE3_CALL(sqlite3_step(sql_stmt_delete_descriptors_));
-  SQLITE3_CALL(sqlite3_reset(sql_stmt_delete_descriptors_));
-
   SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_descriptors_, 1, image_id));
-  WriteDynamicMatrixBlob(sql_stmt_write_descriptors_, fds, 2);
+  WriteDynamicMatrixBlob(sql_stmt_write_descriptors_, descriptors, 2);
 
   SQLITE3_CALL(sqlite3_step(sql_stmt_write_descriptors_));
   SQLITE3_CALL(sqlite3_reset(sql_stmt_write_descriptors_));
@@ -1137,6 +1099,11 @@ void Database::PrepareSQLStatements() {
   //////////////////////////////////////////////////////////////////////////////
   // update_*
   //////////////////////////////////////////////////////////////////////////////
+  sql = "UPDATE keypoints SET data=? WHERE image_id=?;"; //DOES THIS NEED VALUES(?, ?)
+  SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
+                                  &sql_stmt_update_keypoints_, 0));
+  sql_stmts_.push_back(sql_stmt_update_keypoints_);
+
   sql =
       "UPDATE cameras SET model=?, width=?, height=?, params=?, "
       "prior_focal_length=? WHERE camera_id=?;";
