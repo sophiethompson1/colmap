@@ -113,7 +113,7 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
   //////////////////////////////////////////////////////////////////////////////
 
   const bool exists_image = database_->ExistsImageWithName(image->Name());
-
+  // ST: SET THIS TO FALSE ONCE WE CAN ADD DESCRIPTORS
   if (exists_image) {
     *image = database_->ReadImageWithName(image->Name());
     const bool exists_keypoints = database_->ExistsKeypoints(image->ImageId());

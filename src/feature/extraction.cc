@@ -200,6 +200,9 @@ void SiftFeatureExtractor::Run() {
     }
 
     internal::ImageData image_data;
+    std::cout << "Image path inside is " << image_reader_.options_.image_path << "\n" << std::endl;
+    //std::cout << "Inside else1 Image list size" << image_reader_.options_.image_list.size() << std::endl;
+
     image_data.status =
         image_reader_.Next(&image_data.camera, &image_data.image,
                            &image_data.bitmap, &image_data.mask);
@@ -220,8 +223,8 @@ void SiftFeatureExtractor::Run() {
   for (auto& resizer : resizers_) {
     resizer->Wait();
   }
-
-  extractor_queue_->Wait();
+  
+  extractor_queue_->Wait(); 
   extractor_queue_->Stop();
   for (auto& extractor : extractors_) {
     extractor->Wait();

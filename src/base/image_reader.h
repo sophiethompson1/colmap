@@ -114,9 +114,10 @@ class ImageReader {
   size_t NextIndex() const;
   size_t NumImages() const;
 
- private:
+ 
   // Image reader options.
   ImageReaderOptions options_;
+private:
   Database* database_;
   // Index of previously processed image.
   size_t image_index_;

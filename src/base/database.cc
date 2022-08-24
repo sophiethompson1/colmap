@@ -667,9 +667,16 @@ image_t Database::WriteImage(const Image& image,
 
 void Database::WriteKeypoints(const image_t image_id,
                               const FeatureKeypoints& keypoints) const {
+  std::cout << "Im writing in the keypoints for "<< image_id << " thats the image id" << std::endl;
+  uint32_t temp = 15;
+  uint32_t new_id = image_id;
+  if (image_id > temp) {
+    std::cout << "Bigger than 15" << std::endl;
+    new_id = new_id - temp;
+  }
   const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(keypoints);
 
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_keypoints_, 1, image_id));
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_keypoints_, 1, new_id));
   WriteDynamicMatrixBlob(sql_stmt_write_keypoints_, blob, 2);
 
   SQLITE3_CALL(sqlite3_step(sql_stmt_write_keypoints_));
@@ -1293,6 +1300,7 @@ void Database::CreateDescriptorsTable() const {
   SQLITE3_EXEC(database_, sql.c_str(), nullptr);
 }
 
+//need to add insert into keypoints and  descriptors
 void Database::CreateMatchesTable() const {
   const std::string sql =
       "CREATE TABLE IF NOT EXISTS matches"

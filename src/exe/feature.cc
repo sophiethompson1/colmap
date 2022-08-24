@@ -124,7 +124,7 @@ int RunFeatureExtractor(int argc, char** argv) {
     UpdateImageReaderOptionsFromCameraMode(reader_options,
                                            (CameraMode)camera_mode);
   }
-
+  std::cout << "In the Run Feature Extractor method " << std::endl; 
   StringToLower(&descriptor_normalization);
   if (descriptor_normalization == "l1_root") {
     options.sift_extraction->normalization =
@@ -167,11 +167,28 @@ int RunFeatureExtractor(int argc, char** argv) {
                                          *options.sift_extraction);
 
   if (options.sift_extraction->use_gpu && kUseOpenGL) {
+    std::cout << "Inside if1" << std::endl;
     RunThreadWithOpenGLContext(&feature_extractor);
   } else {
+    //std::cout << "Inside else1 Image list size" << reader_options.image_list.size() << std::endl;
+    
     feature_extractor.Start();
     feature_extractor.Wait();
+    //std::cout << "Image path is " << reader_options.image_path << "\n" << std::endl;
+    //std::cout << "Image list is \n" << std::endl;
+    
+    //
+    std::string norm_path = reader_options.image_path.c_str();
+    std::string img_f = "images";
+    int pos = norm_path.length(); 
+    norm_path.replace(pos - img_f.length(), img_f.length(), "normals/images");
+    reader_options.image_path = norm_path;
+    SiftFeatureExtractor feature_extractor2(reader_options,
+                                         *options.sift_extraction);
+    feature_extractor2.Start();
+    feature_extractor2.Wait();
   }
+
 
   return EXIT_SUCCESS;
 }

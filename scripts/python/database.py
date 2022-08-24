@@ -283,7 +283,8 @@ def example_usage():
     keypoints4 = np.random.rand(num_keypoints, 2) * (width2, height2)
 
     db.add_keypoints(image_id1, keypoints1)
-    db.add_keypoints(image_id2, keypoints2)
+    db.add_keypoints(image_id1, keypoints2)
+    #db.add_keypoints(image_id2, keypoints2)
     db.add_keypoints(image_id3, keypoints3)
     db.add_keypoints(image_id4, keypoints4)
 
