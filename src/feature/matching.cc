@@ -369,6 +369,7 @@ void SiftCPUFeatureMatcher::Run() {
       if (!cache_->ExistsDescriptors(data.image_id1) ||
           !cache_->ExistsDescriptors(data.image_id2)) {
         CHECK(output_queue_->Push(std::move(data)));
+        std::cout << "This would be bad but good " << std::endl;
         continue;
       }
 
@@ -422,9 +423,10 @@ void SiftGPUFeatureMatcher::Run() {
     auto input_job = input_queue_->Pop();
     if (input_job.IsValid()) {
       auto& data = input_job.Data();
-
+      //std::cout << "Here?" << std::endl;
       if (!cache_->ExistsDescriptors(data.image_id1) ||
           !cache_->ExistsDescriptors(data.image_id2)) {
+        //std::cout << "This would be bad but good " << std::endl;
         CHECK(output_queue_->Push(std::move(data)));
         continue;
       }
@@ -510,7 +512,7 @@ GuidedSiftGPUFeatureMatcher::GuidedSiftGPUFeatureMatcher(
       input_queue_(input_queue),
       output_queue_(output_queue) {
   CHECK(options_.Check());
-
+  std::cout<< " This should BECOME" << std::endl;
   prev_uploaded_image_ids_[0] = kInvalidImageId;
   prev_uploaded_image_ids_[1] = kInvalidImageId;
 
@@ -524,7 +526,7 @@ void GuidedSiftGPUFeatureMatcher::Run() {
   CHECK(opengl_context_);
   opengl_context_->MakeCurrent();
 #endif
-
+  std::cout<< " This should BECOME2" << std::endl;
   SiftMatchGPU sift_match_gpu;
   if (!CreateSiftGPUMatcher(options_, &sift_match_gpu)) {
     std::cout << "ERROR: SiftGPU not fully supported" << std::endl;
@@ -538,17 +540,21 @@ void GuidedSiftGPUFeatureMatcher::Run() {
     if (IsStopped()) {
       break;
     }
-
+    
     auto input_job = input_queue_->Pop();
+    std::cout<< " This should BECOME3 " << input_job.IsValid() << std::endl;
+    
     if (input_job.IsValid()) {
       auto& data = input_job.Data();
-
+      std::cout<< " This should BECOMEHEHE" << std::endl;
+      std::cout<< " geo " << data.two_view_geometry.inlier_matches.size() << std::endl;
+      std::cout<< " min" << options_.min_num_inliers << std::endl;
       if (data.two_view_geometry.inlier_matches.size() <
           static_cast<size_t>(options_.min_num_inliers)) {
         CHECK(output_queue_->Push(std::move(data)));
         continue;
       }
-
+      
       if (!cache_->ExistsKeypoints(data.image_id1) ||
           !cache_->ExistsKeypoints(data.image_id2) ||
           !cache_->ExistsDescriptors(data.image_id1) ||
@@ -556,7 +562,7 @@ void GuidedSiftGPUFeatureMatcher::Run() {
         CHECK(output_queue_->Push(std::move(data)));
         continue;
       }
-
+      std::cout<< " This should BECOME4" << std::endl;
       const FeatureDescriptors* descriptors1_ptr;
       const FeatureKeypoints* keypoints1_ptr;
       GetFeatureData(0, data.image_id1, &keypoints1_ptr, &descriptors1_ptr);
@@ -599,7 +605,6 @@ TwoViewGeometryVerifier::TwoViewGeometryVerifier(
       input_queue_(input_queue),
       output_queue_(output_queue) {
   CHECK(options_.Check());
-
   two_view_geometry_options_.min_num_inliers =
       static_cast<size_t>(options_.min_num_inliers);
   two_view_geometry_options_.ransac_options.max_error = options_.max_error;
@@ -657,7 +662,7 @@ SiftFeatureMatcher::SiftFeatureMatcher(const SiftMatchingOptions& options,
                                        FeatureMatcherCache* cache)
     : options_(options), database_(database), cache_(cache), is_setup_(false) {
   CHECK(options_.Check());
-
+  std::cout << "HELLO " << std::endl;
   const int num_threads = GetEffectiveNumThreads(options_.num_threads);
   CHECK_GT(num_threads, 0);
 
@@ -698,6 +703,7 @@ SiftFeatureMatcher::SiftFeatureMatcher(const SiftMatchingOptions& options,
 
     if (options_.use_gpu) {
       auto gpu_options = options_;
+      //INVALID INPUT QUEUE
       guided_matchers_.reserve(gpu_indices.size());
       for (const auto& gpu_index : gpu_indices) {
         gpu_options.gpu_index = std::to_string(gpu_index);
@@ -796,7 +802,8 @@ void SiftFeatureMatcher::Match(
   CHECK_NOTNULL(database_);
   CHECK_NOTNULL(cache_);
   CHECK(is_setup_);
-
+  
+  std::cout << "image pair length " << image_pairs.size() << std::endl;
   if (image_pairs.empty()) {
     return;
   }
@@ -811,6 +818,7 @@ void SiftFeatureMatcher::Match(
   size_t num_outputs = 0;
   for (const auto& image_pair : image_pairs) {
     // Avoid self-matches.
+    
     if (image_pair.first == image_pair.second) {
       continue;
     }
@@ -821,7 +829,7 @@ void SiftFeatureMatcher::Match(
     if (image_pair_ids.count(pair_id) > 0) {
       continue;
     }
-
+    //std::cout << "image pair up for matching " << image_pair.first << "   " << image_pair.second << std::endl;
     image_pair_ids.insert(pair_id);
 
     const bool exists_matches =
@@ -830,6 +838,7 @@ void SiftFeatureMatcher::Match(
         cache_->ExistsInlierMatches(image_pair.first, image_pair.second);
 
     if (exists_matches && exists_inlier_matches) {
+      //std::cout << "Exiting here :) " << std::endl;
       continue;
     }
 
@@ -841,6 +850,7 @@ void SiftFeatureMatcher::Match(
     // when writing an existing result into the database.
 
     if (exists_inlier_matches) {
+       //std::cout << "deleting things is bad " << std::endl;
       cache_->DeleteInlierMatches(image_pair.first, image_pair.second);
     }
 
@@ -849,10 +859,12 @@ void SiftFeatureMatcher::Match(
     data.image_id2 = image_pair.second;
 
     if (exists_matches) {
+       //std::cout << "I dont want this bit" << std::endl;
       data.matches = cache_->GetMatches(image_pair.first, image_pair.second);
       cache_->DeleteMatches(image_pair.first, image_pair.second);
       CHECK(verifier_queue_.Push(std::move(data)));
     } else {
+       //std::cout << "Correct place " << std::endl;
       CHECK(matcher_queue_.Push(std::move(data)));
     }
   }
@@ -897,7 +909,7 @@ ExhaustiveFeatureMatcher::ExhaustiveFeatureMatcher(
 
 void ExhaustiveFeatureMatcher::Run() {
   PrintHeading1("Exhaustive feature matching");
-
+  
   if (!matcher_.Setup()) {
     return;
   }
@@ -905,6 +917,10 @@ void ExhaustiveFeatureMatcher::Run() {
   cache_.Setup();
 
   const std::vector<image_t> image_ids = cache_.GetImageIds();
+  std::cout << "The image ids are " << std::endl;
+  for (image_t img_id : image_ids) {
+    std::cout << img_id << std::endl;
+  }
 
   const size_t block_size = static_cast<size_t>(options_.block_size);
   const size_t num_blocks = static_cast<size_t>(

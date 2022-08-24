@@ -201,6 +201,10 @@ class Database {
   // making sure that the entry already exists.
   void UpdateImage(const Image& image) const;
 
+  void DeleteCamera(const image_t camera_id) const;
+
+  void DeleteImage(const image_t image_id) const;
+
   // Delete matches of an image pair.
   void DeleteMatches(const image_t image_id1, const image_t image_id2) const;
 
@@ -339,6 +343,8 @@ class Database {
   // delete_*
   sqlite3_stmt* sql_stmt_delete_descriptors_ = nullptr;
   sqlite3_stmt* sql_stmt_delete_keypoints_ = nullptr;
+  sqlite3_stmt* sql_stmt_delete_cameras_ = nullptr;
+  sqlite3_stmt* sql_stmt_delete_images_ = nullptr;
   sqlite3_stmt* sql_stmt_delete_matches_ = nullptr;
   sqlite3_stmt* sql_stmt_delete_two_view_geometry_ = nullptr;
 

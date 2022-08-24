@@ -169,6 +169,8 @@ SiftFeatureExtractor::SiftFeatureExtractor(
 
   writer_.reset(new internal::FeatureWriterThread(
       image_reader_.NumImages(), &database_, writer_queue_.get()));
+  
+  std::cout << "Is this the end" << std::endl;
 }
 
 void SiftFeatureExtractor::Run() {
@@ -235,6 +237,8 @@ void SiftFeatureExtractor::Run() {
   writer_->Wait();
 
   GetTimer().PrintMinutes();
+  std::cout << "Maybe it is this" << std::endl;
+
 }
 
 FeatureImporter::FeatureImporter(const ImageReaderOptions& reader_options,
@@ -248,7 +252,7 @@ void FeatureImporter::Run() {
     std::cerr << "  ERROR: Import directory does not exist." << std::endl;
     return;
   }
-
+  std::cout << "The feature importer thread" << std::endl; 
   Database database(reader_options_.database_path);
   ImageReader image_reader(reader_options_, &database);
 
@@ -292,6 +296,13 @@ void FeatureImporter::Run() {
 
       if (!database.ExistsDescriptors(image.ImageId())) {
         database.WriteDescriptors(image.ImageId(), descriptors);
+      }
+      if (image.ImageId() > 15) {
+        std::cout << "Deleting camera and image stuff " << std::endl;
+        if (image.ImageId() == image.CameraId()) {
+          database.DeleteCamera(image.CameraId());
+        }
+        database.DeleteImage(image.ImageId());
       }
     } else {
       std::cout << "  SKIP: No features found at " << path << std::endl;
@@ -434,6 +445,7 @@ FeatureWriterThread::FeatureWriterThread(const size_t num_images,
     : num_images_(num_images), database_(database), input_queue_(input_queue) {}
 
 void FeatureWriterThread::Run() {
+  std::cout << "The feature writer thread" << std::endl; 
   size_t image_index = 0;
   while (true) {
     if (IsStopped()) {
@@ -520,6 +532,20 @@ void FeatureWriterThread::Run() {
       if (!database_->ExistsDescriptors(image_data.image.ImageId())) {
         database_->WriteDescriptors(image_data.image.ImageId(),
                                     image_data.descriptors);
+      }
+
+      if (image_data.image.ImageId() > 15) {
+        std::cout << "Deleting camera and image stuff " << std::endl;
+        const image_t imgId = image_data.image.ImageId();
+        const camera_t camId = image_data.image.ImageId();
+        if (imgId == camId) {
+          std::cout << "Deleting BOTH stuff " << std::endl;
+          database_->DeleteImage(image_data.image.ImageId());
+          database_->DeleteCamera(image_data.image.CameraId());
+        } else {
+          std::cout << "Deleting IMAGE stuff " << std::endl;
+          database_->DeleteImage(image_data.image.ImageId());
+        }
       }
     } else {
       break;

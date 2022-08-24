@@ -527,6 +527,7 @@ TwoViewGeometry Database::ReadTwoViewGeometry(const image_t image_id1,
 
   SQLITE3_CALL(sqlite3_reset(sql_stmt_read_two_view_geometry_));
 
+  std::cout << "Is it setting it here " << std::endl;
   two_view_geometry.inlier_matches = FeatureMatchesFromBlob(blob);
   two_view_geometry.F.transposeInPlace();
   two_view_geometry.E.transposeInPlace();
@@ -667,7 +668,7 @@ image_t Database::WriteImage(const Image& image,
 
 void Database::WriteKeypoints(const image_t image_id,
                               const FeatureKeypoints& keypoints) const {
-  std::cout << "Im writing in the keypoints for "<< image_id << " thats the image id" << std::endl;
+  //std::cout << "Im writing in the keypoints for "<< image_id << " thats the image id" << std::endl;
   uint32_t temp = 15;
   uint32_t new_id = image_id;
   if (image_id > temp) {
@@ -677,7 +678,7 @@ void Database::WriteKeypoints(const image_t image_id,
     AppendKeypoints(nextone, keypoints);
   } else {
     const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(keypoints);
-    std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
+    //std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
 
     SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_keypoints_, 1, new_id));
     WriteDynamicMatrixBlob(sql_stmt_write_keypoints_, blob, 2);
@@ -687,6 +688,17 @@ void Database::WriteKeypoints(const image_t image_id,
   }
 }
   
+void Database::DeleteImage(const image_t image_id) const {
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_delete_images_, 1, image_id));
+  SQLITE3_CALL(sqlite3_step(sql_stmt_delete_images_));
+  SQLITE3_CALL(sqlite3_reset(sql_stmt_delete_images_));
+}
+
+void Database::DeleteCamera(const camera_t camera_id) const {
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_delete_cameras_, 1, camera_id));
+  SQLITE3_CALL(sqlite3_step(sql_stmt_delete_cameras_));
+  SQLITE3_CALL(sqlite3_reset(sql_stmt_delete_cameras_));
+}
 
 void Database::AppendKeypoints(const image_t image_id,
                               const FeatureKeypoints& keypoints) const {
@@ -735,7 +747,7 @@ void Database::AppendDescriptors(const image_t image_id,
 
   FeatureDescriptors fds;
   CHECK_EQ(descriptors.cols(), fd.cols());
-  fds.resize(fd.rows() + descriptors.rows(), fd.cols());
+  fds.resize(fd.rows() + descriptors.rows()/4, fd.cols());
   
   
   CHECK_GT(descriptors.cols(), 0);
@@ -746,9 +758,9 @@ void Database::AppendDescriptors(const image_t image_id,
     }
   }
   //CHECK_EQ(descriptors.cols(), 0);
-  for (FeatureDescriptors::Index r = 0; r < descriptors.rows(); ++r) {
+  for (FeatureDescriptors::Index r = 0; r < descriptors.rows()/4; ++r) {
     for (FeatureDescriptors::Index c = 0; c < descriptors.cols(); ++c) {
-      fds(r + fd.rows(), c) = descriptors(r, c); 
+      fds(r + fd.rows(), c) = descriptors(r*4, c); 
     }
   }
   //CHECK_EQ(descriptors.cols(), 0);
@@ -756,7 +768,6 @@ void Database::AppendDescriptors(const image_t image_id,
   //std::cout << "Feature descriptors rows " << descriptors.rows() << std::endl;
   //std::cout << " cols " << descriptors.cols() << std::endl;
   //std::cout << " access " << descriptors.row(0) << std::endl;
-  std::cout << "Columns fd " << fd.cols() << " descriptors " << descriptors.cols() << std::endl;
 
   SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_descriptors_, 4, image_id));
   WriteDynamicMatrixBlob(sql_stmt_update_descriptors_, fds, 1);
@@ -1276,6 +1287,16 @@ void Database::PrepareSQLStatements() {
   SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
                                   &sql_stmt_delete_keypoints_, 0));
   sql_stmts_.push_back(sql_stmt_delete_keypoints_);
+
+  sql = "DELETE FROM cameras WHERE camera_id = ?;";
+  SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
+                                  &sql_stmt_delete_cameras_, 0));
+  sql_stmts_.push_back(sql_stmt_delete_cameras_);
+
+  sql = "DELETE FROM images WHERE image_id = ?;";
+  SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
+                                  &sql_stmt_delete_images_, 0));
+  sql_stmts_.push_back(sql_stmt_delete_images_);
 
   sql = "DELETE FROM matches WHERE pair_id = ?;";
   SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,

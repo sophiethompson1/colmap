@@ -178,15 +178,27 @@ int RunFeatureExtractor(int argc, char** argv) {
     //std::cout << "Image list is \n" << std::endl;
     
     //
+
     std::string norm_path = reader_options.image_path.c_str();
     std::string img_f = "images";
     int pos = norm_path.length(); 
     norm_path.replace(pos - img_f.length(), img_f.length(), "normals/images");
     reader_options.image_path = norm_path;
+
+    int prev_max_num_features = (*options.sift_extraction).max_num_features;
+    int prev_edge_threshold = (*options.sift_extraction).edge_threshold;
+
+    (*options.sift_extraction).max_num_features = prev_max_num_features/4;
+    (*options.sift_extraction).edge_threshold = prev_edge_threshold /2;
     SiftFeatureExtractor feature_extractor2(reader_options,
                                          *options.sift_extraction);
     feature_extractor2.Start();
     feature_extractor2.Wait();
+    std::cout << "The norm path is " << norm_path << " The image path is going back to " << *options.image_path << std::endl;
+
+    reader_options.image_path = *options.image_path;
+    (*options.sift_extraction).max_num_features = prev_max_num_features;
+    (*options.sift_extraction).edge_threshold = prev_edge_threshold;
   }
 
 

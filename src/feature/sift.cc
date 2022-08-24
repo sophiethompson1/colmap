@@ -1165,6 +1165,9 @@ void MatchSiftFeaturesGPU(const SiftMatchingOptions& match_options,
     WarnIfMaxNumMatchesReachedGPU(*sift_match_gpu, *descriptors1);
     sift_match_gpu->SetDescriptors(0, descriptors1->rows(),
                                    descriptors1->data());
+    //std::cout << "Descriptors 1 " << descriptors1->rows() << std::endl;
+  } else {
+    //std::cout << "Descriptors 1  BAD"  << std::endl;
   }
 
   if (descriptors2 != nullptr) {
@@ -1172,10 +1175,12 @@ void MatchSiftFeaturesGPU(const SiftMatchingOptions& match_options,
     WarnIfMaxNumMatchesReachedGPU(*sift_match_gpu, *descriptors2);
     sift_match_gpu->SetDescriptors(1, descriptors2->rows(),
                                    descriptors2->data());
+    //std::cout << "Descriptors 2 " << descriptors2->rows() << std::endl;
+  } else {
+    //std::cout << "Descriptors 2 BAD " << std::endl;
   }
 
   matches->resize(static_cast<size_t>(match_options.max_num_matches));
-
   const int num_matches = sift_match_gpu->GetSiftMatch(
       match_options.max_num_matches,
       reinterpret_cast<uint32_t(*)[2]>(matches->data()),
@@ -1191,6 +1196,7 @@ void MatchSiftFeaturesGPU(const SiftMatchingOptions& match_options,
   } else {
     CHECK_LE(num_matches, matches->size());
     matches->resize(num_matches);
+    std::cout << "The number of matches " << num_matches << std::endl;
   }
 }
 
@@ -1207,7 +1213,7 @@ void MatchGuidedSiftFeaturesGPU(const SiftMatchingOptions& match_options,
                 "Invalid keypoint format");
   static_assert(sizeof(FeatureKeypoint) == 6 * sizeof(float),
                 "Invalid keypoint format");
-
+  std::cout << "DO I GET HERE " << std::endl;
   CHECK(match_options.Check());
   CHECK_NOTNULL(sift_match_gpu);
   CHECK_NOTNULL(two_view_geometry);
@@ -1285,6 +1291,7 @@ void MatchGuidedSiftFeaturesGPU(const SiftMatchingOptions& match_options,
   } else {
     CHECK_LE(num_matches, two_view_geometry->inlier_matches.size());
     two_view_geometry->inlier_matches.resize(num_matches);
+    std::cout << "The GUIDED number of matches " << num_matches << std::endl;
   }
 }
 
