@@ -186,6 +186,13 @@ class Database {
   void WriteTwoViewGeometry(const image_t image_id1, const image_t image_id2,
                             const TwoViewGeometry& two_view_geometry) const;
 
+  // ST HERE
+  void AppendKeypoints(const image_t image_id,
+                              const FeatureKeypoints& keypoints) const;
+
+  void AppendDescriptors(const image_t image_id,
+                              const FeatureDescriptors& descriptors) const;
+
   // Update an existing camera in the database. The user is responsible for
   // making sure that the entry already exists.
   void UpdateCamera(const Camera& camera) const;
@@ -328,6 +335,8 @@ class Database {
   sqlite3_stmt* sql_stmt_write_two_view_geometry_ = nullptr;
 
   // delete_*
+  sqlite3_stmt* sql_stmt_delete_descriptors_ = nullptr;
+  sqlite3_stmt* sql_stmt_delete_keypoints_ = nullptr;
   sqlite3_stmt* sql_stmt_delete_matches_ = nullptr;
   sqlite3_stmt* sql_stmt_delete_two_view_geometry_ = nullptr;
 
