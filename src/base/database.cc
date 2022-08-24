@@ -695,14 +695,14 @@ void Database::AppendKeypoints(const image_t image_id,
   //Append keypoints together
   
   FeatureKeypoints fks;
-
+  fks.resize(fk.size() + keypoints.size());
   fks.insert(fks.end(), fk.begin(), fk.end());
   fks.insert(fks.end(), keypoints.begin(), keypoints.end());
 
   const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(fks);
   std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
 
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_keypoints_, 2, image_id));
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_keypoints_, 4, image_id));
   WriteDynamicMatrixBlob(sql_stmt_update_keypoints_, blob, 1);
 
   SQLITE3_CALL(sqlite3_step(sql_stmt_update_keypoints_));
@@ -711,12 +711,60 @@ void Database::AppendKeypoints(const image_t image_id,
 
 void Database::WriteDescriptors(const image_t image_id,
                                 const FeatureDescriptors& descriptors) const {
-  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_descriptors_, 1, image_id));
-  WriteDynamicMatrixBlob(sql_stmt_write_descriptors_, descriptors, 2);
+  uint32_t temp = 15;
+  uint32_t new_id = image_id;
+  if (image_id > temp) {
+    std::cout << "Bigger than 15" << std::endl;
+    new_id = new_id - temp;
+    const image_t nextone = new_id;
+    AppendDescriptors(nextone, descriptors);
+  } else {
 
-  SQLITE3_CALL(sqlite3_step(sql_stmt_write_descriptors_));
-  SQLITE3_CALL(sqlite3_reset(sql_stmt_write_descriptors_));
+    SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_descriptors_, 1, image_id));
+    WriteDynamicMatrixBlob(sql_stmt_write_descriptors_, descriptors, 2);
+
+    SQLITE3_CALL(sqlite3_step(sql_stmt_write_descriptors_));
+    SQLITE3_CALL(sqlite3_reset(sql_stmt_write_descriptors_));
+  }
 }
+
+
+void Database::AppendDescriptors(const image_t image_id,
+                                const FeatureDescriptors& descriptors) const {
+  FeatureDescriptors fd = ReadDescriptors(image_id);
+
+  FeatureDescriptors fds;
+  CHECK_EQ(descriptors.cols(), fd.cols());
+  fds.resize(fd.rows() + descriptors.rows(), fd.cols());
+  
+  
+  CHECK_GT(descriptors.cols(), 0);
+  
+  for (FeatureDescriptors::Index r = 0; r < fd.rows(); ++r) {
+    for (FeatureDescriptors::Index c = 0; c < fd.cols(); ++c) {
+      fds(r, c) = fd(r, c);
+    }
+  }
+  //CHECK_EQ(descriptors.cols(), 0);
+  for (FeatureDescriptors::Index r = 0; r < descriptors.rows(); ++r) {
+    for (FeatureDescriptors::Index c = 0; c < descriptors.cols(); ++c) {
+      fds(r + fd.rows(), c) = descriptors(r, c); 
+    }
+  }
+  //CHECK_EQ(descriptors.cols(), 0);
+  
+  //std::cout << "Feature descriptors rows " << descriptors.rows() << std::endl;
+  //std::cout << " cols " << descriptors.cols() << std::endl;
+  //std::cout << " access " << descriptors.row(0) << std::endl;
+  std::cout << "Columns fd " << fd.cols() << " descriptors " << descriptors.cols() << std::endl;
+
+  SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_descriptors_, 4, image_id));
+  WriteDynamicMatrixBlob(sql_stmt_update_descriptors_, fds, 1);
+
+  SQLITE3_CALL(sqlite3_step(sql_stmt_update_descriptors_));
+  SQLITE3_CALL(sqlite3_reset(sql_stmt_update_descriptors_));
+}
+
 
 void Database::WriteMatches(const image_t image_id1, const image_t image_id2,
                             const FeatureMatches& matches) const {
@@ -1099,7 +1147,12 @@ void Database::PrepareSQLStatements() {
   //////////////////////////////////////////////////////////////////////////////
   // update_*
   //////////////////////////////////////////////////////////////////////////////
-  sql = "UPDATE keypoints SET data=? WHERE image_id=?;"; //DOES THIS NEED VALUES(?, ?)
+  sql = "UPDATE descriptors SET rows=?, cols=?, data=? WHERE image_id=?;"; //DOES THIS NEED VALUES(?, ?)
+  SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
+                                  &sql_stmt_update_descriptors_, 0));
+  sql_stmts_.push_back(sql_stmt_update_descriptors_);
+
+  sql = "UPDATE keypoints SET rows=?, cols=?, data=? WHERE image_id=?;"; //DOES THIS NEED VALUES(?, ?)
   SQLITE3_CALL(sqlite3_prepare_v2(database_, sql.c_str(), -1,
                                   &sql_stmt_update_keypoints_, 0));
   sql_stmts_.push_back(sql_stmt_update_keypoints_);

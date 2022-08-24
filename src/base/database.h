@@ -189,6 +189,9 @@ class Database {
   // ST HERE
   void AppendKeypoints(const image_t image_id,
                               const FeatureKeypoints& keypoints) const;
+  
+  void AppendDescriptors(const image_t image_id,
+                              const FeatureDescriptors& descriptors) const;
 
   // Update an existing camera in the database. The user is responsible for
   // making sure that the entry already exists.
@@ -308,6 +311,7 @@ class Database {
   sqlite3_stmt* sql_stmt_add_image_ = nullptr;
 
   // update_*
+  sqlite3_stmt* sql_stmt_update_descriptors_ = nullptr;
   sqlite3_stmt* sql_stmt_update_keypoints_ = nullptr;
   sqlite3_stmt* sql_stmt_update_camera_ = nullptr;
   sqlite3_stmt* sql_stmt_update_image_ = nullptr;
