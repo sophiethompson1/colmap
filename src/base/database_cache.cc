@@ -58,7 +58,7 @@ void DatabaseCache::Load(const Database& database, const size_t min_num_matches,
   //////////////////////////////////////////////////////////////////////////////
   // Load cameras
   //////////////////////////////////////////////////////////////////////////////
-
+  std::cout<< "l61 database cache" << std::endl;
   Timer timer;
 
   timer.Start();
@@ -90,9 +90,9 @@ void DatabaseCache::Load(const Database& database, const size_t min_num_matches,
   std::cout << StringPrintf(" %d in %.3fs", image_pair_ids.size(),
                             timer.ElapsedSeconds())
             << std::endl;
-
   auto UseInlierMatchesCheck = [min_num_matches, ignore_watermarks](
                                    const TwoViewGeometry& two_view_geometry) {
+    std::cout << "l95cache: " << two_view_geometry.inlier_matches.size() << std::endl;
     return static_cast<size_t>(two_view_geometry.inlier_matches.size()) >=
                min_num_matches &&
            (!ignore_watermarks ||
@@ -173,6 +173,7 @@ void DatabaseCache::Load(const Database& database, const size_t min_num_matches,
 
   size_t num_ignored_image_pairs = 0;
   for (size_t i = 0; i < image_pair_ids.size(); ++i) {
+    
     if (UseInlierMatchesCheck(two_view_geometries[i])) {
       image_t image_id1;
       image_t image_id2;

@@ -53,6 +53,7 @@ namespace {
 FeatureMatches ExtractInlierMatches(const FeatureMatches& matches,
                                     const size_t num_inliers,
                                     const std::vector<char>& inlier_mask) {
+  std::cout << "extract inlier matches 56" << std::endl;
   FeatureMatches inlier_matches(num_inliers);
   size_t j = 0;
   for (size_t i = 0; i < matches.size(); ++i) {
@@ -67,7 +68,7 @@ FeatureMatches ExtractInlierMatches(const FeatureMatches& matches,
 FeatureMatches ExtractOutlierMatches(const FeatureMatches& matches,
                                      const FeatureMatches& inlier_matches) {
   CHECK_GE(matches.size(), inlier_matches.size());
-
+  std::cout << "outlier 71" << std::endl;
   std::unordered_set<std::pair<point2D_t, point2D_t>> inlier_matches_set;
   inlier_matches_set.reserve(inlier_matches.size());
   for (const auto& match : inlier_matches) {
@@ -424,6 +425,7 @@ void TwoViewGeometry::EstimateUncalibrated(
     config = ConfigurationType::UNCALIBRATED;
   }
 
+  std::cout << "Uncalibrated 428" << std::endl;
   inlier_matches =
       ExtractInlierMatches(matches, num_inliers, *best_inlier_mask);
 
@@ -467,7 +469,7 @@ void TwoViewGeometry::EstimateHomography(
   } else {
     config = ConfigurationType::PLANAR_OR_PANORAMIC;
   }
-
+  std::cout << "Homography 472 " << std::endl;
   inlier_matches = ExtractInlierMatches(matches, H_report.support.num_inliers,
                                         H_report.inlier_mask);
   if (options.detect_watermark &&

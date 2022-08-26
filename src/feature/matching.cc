@@ -477,7 +477,7 @@ void GuidedSiftCPUFeatureMatcher::Run() {
     auto input_job = input_queue_->Pop();
     if (input_job.IsValid()) {
       auto& data = input_job.Data();
-
+      std::cout << "CPU 480" << std::endl;
       if (data.two_view_geometry.inlier_matches.size() <
           static_cast<size_t>(options_.min_num_inliers)) {
         CHECK(output_queue_->Push(std::move(data)));
@@ -512,7 +512,7 @@ GuidedSiftGPUFeatureMatcher::GuidedSiftGPUFeatureMatcher(
       input_queue_(input_queue),
       output_queue_(output_queue) {
   CHECK(options_.Check());
-  std::cout<< " This should BECOME" << std::endl;
+  //std::cout<< " This should BECOME" << std::endl;
   prev_uploaded_image_ids_[0] = kInvalidImageId;
   prev_uploaded_image_ids_[1] = kInvalidImageId;
 
@@ -542,13 +542,21 @@ void GuidedSiftGPUFeatureMatcher::Run() {
     }
     
     auto input_job = input_queue_->Pop();
-    std::cout<< " This should BECOME3 " << input_job.IsValid() << std::endl;
+    //std::cout<< " This should BECOME3 " << input_job.IsValid() << std::endl;
     
     if (input_job.IsValid()) {
       auto& data = input_job.Data();
-      std::cout<< " This should BECOMEHEHE" << std::endl;
+      //std::cout<< " This should BECOMEHEHE" << std::endl;
       std::cout<< " geo " << data.two_view_geometry.inlier_matches.size() << std::endl;
       std::cout<< " min" << options_.min_num_inliers << std::endl;
+
+      //FeatureDescriptors fd1 = *(cache_->GetDescriptors(data.image_id1));
+      //FeatureDescriptors fd2 = *(cache_->GetDescriptors(data.image_id2));
+
+      //std::cout<< " fd1 " << fd1.rows() << std::endl;
+      //std::cout<< " fd2 " << fd2.rows() << std::endl;
+
+      std::cout << "The geo info is " << data.two_view_geometry.config << std::endl;
       if (data.two_view_geometry.inlier_matches.size() <
           static_cast<size_t>(options_.min_num_inliers)) {
         CHECK(output_queue_->Push(std::move(data)));
@@ -1722,6 +1730,8 @@ void FeaturePairsFeatureMatcher::Run() {
       }
 
       two_view_geometry.inlier_matches = matches;
+
+      std::cout << "l1735: " << matches.size() << std::endl;
 
       database_.WriteTwoViewGeometry(image1.ImageId(), image2.ImageId(),
                                      two_view_geometry);

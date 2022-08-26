@@ -201,7 +201,7 @@ class Database {
   // making sure that the entry already exists.
   void UpdateImage(const Image& image) const;
 
-  void DeleteCamera(const image_t camera_id) const;
+  void DeleteCamera(const camera_t camera_id) const;
 
   void DeleteImage(const image_t image_id) const;
 
