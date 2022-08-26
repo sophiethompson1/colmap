@@ -475,7 +475,6 @@ void GuidedSiftCPUFeatureMatcher::Run() {
     auto input_job = input_queue_->Pop();
     if (input_job.IsValid()) {
       auto& data = input_job.Data();
-      std::cout << "CPU 480" << std::endl;
       if (data.two_view_geometry.inlier_matches.size() <
           static_cast<size_t>(options_.min_num_inliers)) {
         CHECK(output_queue_->Push(std::move(data)));

@@ -674,8 +674,13 @@ void Database::WriteKeypoints(const image_t image_id,
   uint32_t temp = 15;
   uint32_t new_id = image_id;
   if (image_id > temp) {
-    std::cout << "Bigger than 15" << std::endl;
-    new_id = new_id - temp;
+    
+    new_id = new_id % temp;
+    std::cout << "Bigger than 15" << new_id << std::endl;
+    if (new_id == 0) {
+      new_id = temp;
+      std::cout << "It was 15 " << new_id << std::endl;
+    }
     const image_t nextone = new_id;
     AppendKeypoints(nextone, keypoints);
   } else {
@@ -730,7 +735,11 @@ void Database::WriteDescriptors(const image_t image_id,
   uint32_t new_id = image_id;
   if (image_id > temp) {
     std::cout << "Bigger than 15" << std::endl;
-    new_id = new_id - temp;
+    new_id = new_id % temp;
+    if (new_id == 0) {
+      new_id = temp;
+      std::cout << "It was 15 " << new_id << std::endl;
+    }
     const image_t nextone = new_id;
     AppendDescriptors(nextone, descriptors);
   } else {
