@@ -1165,20 +1165,13 @@ void MatchSiftFeaturesGPU(const SiftMatchingOptions& match_options,
     WarnIfMaxNumMatchesReachedGPU(*sift_match_gpu, *descriptors1);
     sift_match_gpu->SetDescriptors(0, descriptors1->rows(),
                                    descriptors1->data());
-    //std::cout << "Descriptors 1 " << descriptors1->rows() << std::endl;
-  } else {
-    //std::cout << "Descriptors 1  BAD"  << std::endl;
-  }
-
+  } 
   if (descriptors2 != nullptr) {
     CHECK_EQ(descriptors2->cols(), 128);
     WarnIfMaxNumMatchesReachedGPU(*sift_match_gpu, *descriptors2);
     sift_match_gpu->SetDescriptors(1, descriptors2->rows(),
                                    descriptors2->data());
-    //std::cout << "Descriptors 2 " << descriptors2->rows() << std::endl;
-  } else {
-    //std::cout << "Descriptors 2 BAD " << std::endl;
-  }
+  } 
 
   matches->resize(static_cast<size_t>(match_options.max_num_matches));
   const int num_matches = sift_match_gpu->GetSiftMatch(
@@ -1207,13 +1200,13 @@ void MatchGuidedSiftFeaturesGPU(const SiftMatchingOptions& match_options,
                                 const FeatureDescriptors* descriptors2,
                                 SiftMatchGPU* sift_match_gpu,
                                 TwoViewGeometry* two_view_geometry) {
+  std::cout << "Gets to match guided sift GPU" << std::endl;
   static_assert(offsetof(FeatureKeypoint, x) == 0 * sizeof(float),
                 "Invalid keypoint format");
   static_assert(offsetof(FeatureKeypoint, y) == 1 * sizeof(float),
                 "Invalid keypoint format");
   static_assert(sizeof(FeatureKeypoint) == 6 * sizeof(float),
                 "Invalid keypoint format");
-  std::cout << "DO I GET HERE " << std::endl;
   CHECK(match_options.Check());
   CHECK_NOTNULL(sift_match_gpu);
   CHECK_NOTNULL(two_view_geometry);

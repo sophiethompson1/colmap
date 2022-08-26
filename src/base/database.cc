@@ -670,7 +670,7 @@ image_t Database::WriteImage(const Image& image,
 
 void Database::WriteKeypoints(const image_t image_id,
                               const FeatureKeypoints& keypoints) const {
-  //std::cout << "Im writing in the keypoints for "<< image_id << " thats the image id" << std::endl;
+  
   uint32_t temp = 15;
   uint32_t new_id = image_id;
   if (image_id > temp) {
@@ -680,7 +680,6 @@ void Database::WriteKeypoints(const image_t image_id,
     AppendKeypoints(nextone, keypoints);
   } else {
     const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(keypoints);
-    //std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
 
     SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_keypoints_, 1, new_id));
     WriteDynamicMatrixBlob(sql_stmt_write_keypoints_, blob, 2);
@@ -709,12 +708,14 @@ void Database::AppendKeypoints(const image_t image_id,
   //Append keypoints together
   
   FeatureKeypoints fks;
-  fks.resize(fk.size() + keypoints.size());
   fks.insert(fks.end(), fk.begin(), fk.end());
   fks.insert(fks.end(), keypoints.begin(), keypoints.end());
-
+  for (int i = 0; i < fk.size(); ++i) {
+    CHECK_EQ(fk[i].x, fks[i].x);
+    CHECK_EQ(fk[i].y, fks[i].y);
+  }
+  CHECK_EQ(fks.size(), fk.size() + keypoints.size());
   const FeatureKeypointsBlob blob = FeatureKeypointsToBlob(fks);
-  //std::cout << "Blob col " << blob.cols() << " row " << blob.rows();
 
   SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_keypoints_, 4, image_id));
   WriteDynamicMatrixBlob(sql_stmt_update_keypoints_, blob, 1);
@@ -759,17 +760,11 @@ void Database::AppendDescriptors(const image_t image_id,
       fds(r, c) = fd(r, c);
     }
   }
-  //CHECK_EQ(descriptors.cols(), 0);
   for (FeatureDescriptors::Index r = 0; r < descriptors.rows(); ++r) {
     for (FeatureDescriptors::Index c = 0; c < descriptors.cols(); ++c) {
       fds(r + fd.rows(), c) = descriptors(r, c); 
     }
   }
-  //CHECK_EQ(descriptors.cols(), 0);
-  
-  //std::cout << "Feature descriptors rows " << descriptors.rows() << std::endl;
-  //std::cout << " cols " << descriptors.cols() << std::endl;
-  //std::cout << " access " << descriptors.row(0) << std::endl;
 
   SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_update_descriptors_, 4, image_id));
   WriteDynamicMatrixBlob(sql_stmt_update_descriptors_, fds, 1);
@@ -783,8 +778,6 @@ void Database::WriteMatches(const image_t image_id1, const image_t image_id2,
                             const FeatureMatches& matches) const {
   const image_pair_t pair_id = ImagePairToPairId(image_id1, image_id2);
   SQLITE3_CALL(sqlite3_bind_int64(sql_stmt_write_matches_, 1, pair_id));
-  //std::cout << "When is this being done " << std::endl;
-  //std::cout << "Number of matches " << matches.size() << std::endl;
 
   // Important: the swapped data must live until the query is executed.
   FeatureMatchesBlob blob = FeatureMatchesToBlob(matches);

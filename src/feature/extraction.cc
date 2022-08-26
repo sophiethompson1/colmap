@@ -202,8 +202,6 @@ void SiftFeatureExtractor::Run() {
     }
 
     internal::ImageData image_data;
-    std::cout << "Image path inside is " << image_reader_.options_.image_path << "\n" << std::endl;
-    //std::cout << "Inside else1 Image list size" << image_reader_.options_.image_list.size() << std::endl;
 
     image_data.status =
         image_reader_.Next(&image_data.camera, &image_data.image,
@@ -252,7 +250,6 @@ void FeatureImporter::Run() {
     std::cerr << "  ERROR: Import directory does not exist." << std::endl;
     return;
   }
-  std::cout << "The feature importer thread" << std::endl; 
   Database database(reader_options_.database_path);
   ImageReader image_reader(reader_options_, &database);
 
@@ -445,7 +442,6 @@ FeatureWriterThread::FeatureWriterThread(const size_t num_images,
     : num_images_(num_images), database_(database), input_queue_(input_queue) {}
 
 void FeatureWriterThread::Run() {
-  std::cout << "The feature writer thread" << std::endl; 
   size_t image_index = 0;
   while (true) {
     if (IsStopped()) {
@@ -539,11 +535,9 @@ void FeatureWriterThread::Run() {
         const image_t imgId = image_data.image.ImageId();
         const camera_t camId = image_data.image.ImageId();
         if (imgId == camId) {
-          std::cout << "Deleting BOTH stuff " << std::endl;
           database_->DeleteImage(image_data.image.ImageId());
           database_->DeleteCamera(image_data.image.CameraId());
         } else {
-          std::cout << "Deleting IMAGE stuff " << std::endl;
           database_->DeleteImage(image_data.image.ImageId());
         }
       }

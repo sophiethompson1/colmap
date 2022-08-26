@@ -170,13 +170,9 @@ int RunFeatureExtractor(int argc, char** argv) {
     std::cout << "Inside if1" << std::endl;
     RunThreadWithOpenGLContext(&feature_extractor);
   } else {
-    //std::cout << "Inside else1 Image list size" << reader_options.image_list.size() << std::endl;
     
     feature_extractor.Start();
     feature_extractor.Wait();
-    //std::cout << "Image path is " << reader_options.image_path << "\n" << std::endl;
-    //std::cout << "Image list is \n" << std::endl;
-    
     //
 
     std::string norm_path = reader_options.image_path.c_str();
