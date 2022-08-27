@@ -255,6 +255,22 @@ void OptionManager::AddExtractionOptions() {
                               &sift_extraction->num_threads);
   AddAndRegisterDefaultOption("SiftExtraction.use_gpu",
                               &sift_extraction->use_gpu);
+  AddAndRegisterDefaultOption("SiftExtraction.use_R",
+                              &sift_extraction->use_R);
+  AddAndRegisterDefaultOption("SiftExtraction.use_G",
+                              &sift_extraction->use_G);
+  AddAndRegisterDefaultOption("SiftExtraction.use_B",
+                              &sift_extraction->use_B);
+  AddAndRegisterDefaultOption("SiftExtraction.use_X",
+                              &sift_extraction->use_X);
+  AddAndRegisterDefaultOption("SiftExtraction.use_Y",
+                              &sift_extraction->use_Y);
+  AddAndRegisterDefaultOption("SiftExtraction.use_Z",
+                              &sift_extraction->use_Z);
+  AddAndRegisterDefaultOption("SiftExtraction.use_T",
+                              &sift_extraction->use_T);
+  AddAndRegisterDefaultOption("SiftExtraction.use_P",
+                              &sift_extraction->use_P);
   AddAndRegisterDefaultOption("SiftExtraction.gpu_index",
                               &sift_extraction->gpu_index);
   AddAndRegisterDefaultOption("SiftExtraction.max_image_size",

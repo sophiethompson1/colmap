@@ -48,6 +48,30 @@ struct SiftExtractionOptions {
   // Whether to use the GPU for feature extraction.
   bool use_gpu = true;
 
+  // Whether to extract R channel.
+  bool use_R = false;
+
+  // Whether to extract G channel.
+  bool use_G = false;
+
+  // Whether to extract B channel.
+  bool use_B = false;
+
+  // Whether to extract X channel.
+  bool use_X = false;
+
+  /// Whether to extract Y channel.
+  bool use_Y = false;
+
+  // Whether to extract Z channel.
+  bool use_Z = false;
+
+  // Whether to extract Theta channel.
+  bool use_T = false;
+
+  // Whether to extract Phi channel.
+  bool use_P = false;
+
   // Index of the GPU used for feature extraction. For multi-GPU extraction,
   // you should separate multiple GPU indices by comma, e.g., "0,1,2,3".
   std::string gpu_index = "-1";
