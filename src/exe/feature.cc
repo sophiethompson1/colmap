@@ -173,24 +173,81 @@ int RunFeatureExtractor(int argc, char** argv) {
     feature_extractor.Start();
     feature_extractor.Wait();
     //
-    
-    std::string norm_path = reader_options.image_path.c_str();
+    std::string original_path = reader_options.image_path.c_str();
+    std::string norm_path = original_path.c_str();
     std::string img_f = "images";
     int pos = norm_path.length(); 
-    norm_path.replace(pos - img_f.length(), img_f.length(), "normals/images");
+    
+    //R Section
+    //norm_path.replace(pos - img_f.length(), img_f.length(), "R/images");
+    //reader_options.image_path = norm_path;
+//
+    //SiftFeatureExtractor feature_extractor2(reader_options,
+    //                                     *options.sift_extraction);
+    //feature_extractor2.Start();
+    //feature_extractor2.Wait();
+    //std::cout << "The norm path is " << norm_path <<  std::endl;
+
+    //G Section
+    //norm_path = original_path.c_str();
+    //pos = norm_path.length(); 
+    //norm_path.replace(pos - img_f.length(), img_f.length(), "G/images");
+    //reader_options.image_path = norm_path;
+//
+    //SiftFeatureExtractor feature_extractor3(reader_options,
+    //                                     *options.sift_extraction);
+    //feature_extractor3.Start();
+    //feature_extractor3.Wait();
+    //std::cout << "The norm path is " << norm_path <<  std::endl;
+
+    //B Section
+    //norm_path = original_path.c_str();
+    //pos = norm_path.length(); 
+    //norm_path.replace(pos - img_f.length(), img_f.length(), "B/images");
+    //reader_options.image_path = norm_path;
+//
+    //SiftFeatureExtractor feature_extractor4(reader_options,
+    //                                     *options.sift_extraction);
+    //feature_extractor4.Start();
+    //feature_extractor4.Wait();
+    //std::cout << "The norm path is " << norm_path <<  std::endl;
+
+    //X Section
+    norm_path = original_path.c_str();
+    pos = norm_path.length(); 
+    norm_path.replace(pos - img_f.length(), img_f.length(), "X/images");
     reader_options.image_path = norm_path;
 
-    int prev_max_num_features = (*options.sift_extraction).max_num_features;
-    int prev_edge_threshold = (*options.sift_extraction).edge_threshold;
-
-    //(*options.sift_extraction).max_num_features = prev_max_num_features/4;
-    //(*options.sift_extraction).edge_threshold = prev_edge_threshold /2;
-    SiftFeatureExtractor feature_extractor2(reader_options,
+    SiftFeatureExtractor feature_extractor5(reader_options,
                                          *options.sift_extraction);
-    feature_extractor2.Start();
-    feature_extractor2.Wait();
-    std::cout << "The norm path is " << norm_path << " The image path is going back to " << *options.image_path << std::endl;
+    feature_extractor5.Start();
+    feature_extractor5.Wait();
+    std::cout << "The norm path is " << norm_path << std::endl;
 
+    //Y Section
+    norm_path = original_path.c_str();
+    pos = norm_path.length(); 
+    norm_path.replace(pos - img_f.length(), img_f.length(), "Y/images");
+    reader_options.image_path = norm_path;
+
+    SiftFeatureExtractor feature_extractor6(reader_options,
+                                         *options.sift_extraction);
+    feature_extractor6.Start();
+    feature_extractor6.Wait();
+    std::cout << "The norm path is " << norm_path << std::endl;
+
+    //Z section
+    norm_path = original_path.c_str();
+    pos = norm_path.length(); 
+    norm_path.replace(pos - img_f.length(), img_f.length(), "Z/images");
+    reader_options.image_path = norm_path;
+
+    SiftFeatureExtractor feature_extractor7(reader_options,
+                                         *options.sift_extraction);
+    feature_extractor7.Start();
+    feature_extractor7.Wait();
+    std::cout << "The norm path is " << norm_path << " The image path is going back to " << *options.image_path << std::endl;
+    
     reader_options.image_path = *options.image_path;
     //(*options.sift_extraction).max_num_features = prev_max_num_features;
     //(*options.sift_extraction).edge_threshold = prev_edge_threshold;
