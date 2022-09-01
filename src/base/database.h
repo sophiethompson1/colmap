@@ -178,9 +178,9 @@ class Database {
   // that the entry does not yet exist. For image pairs, the order of
   // `image_id1` and `image_id2` does not matter.
   void WriteKeypoints(const image_t image_id,
-                      const FeatureKeypoints& keypoints) const;
+                      const FeatureKeypoints& keypoints, const int num_images = -1) const;
   void WriteDescriptors(const image_t image_id,
-                        const FeatureDescriptors& descriptors) const;
+                        const FeatureDescriptors& descriptors, const int num_images = -1) const;
   void WriteMatches(const image_t image_id1, const image_t image_id2,
                     const FeatureMatches& matches) const;
   void WriteTwoViewGeometry(const image_t image_id1, const image_t image_id2,

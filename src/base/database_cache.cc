@@ -92,7 +92,6 @@ void DatabaseCache::Load(const Database& database, const size_t min_num_matches,
             << std::endl;
   auto UseInlierMatchesCheck = [min_num_matches, ignore_watermarks](
                                    const TwoViewGeometry& two_view_geometry) {
-    std::cout << "l95cache: " << two_view_geometry.inlier_matches.size() << std::endl;
     return static_cast<size_t>(two_view_geometry.inlier_matches.size()) >=
                min_num_matches &&
            (!ignore_watermarks ||

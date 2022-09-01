@@ -792,7 +792,6 @@ void SiftFeatureMatcher::Match(
   CHECK_NOTNULL(cache_);
   CHECK(is_setup_);
   
-  std::cout << "image pair length " << image_pairs.size() << std::endl;
   if (image_pairs.empty()) {
     return;
   }
@@ -1705,8 +1704,6 @@ void FeaturePairsFeatureMatcher::Run() {
       }
 
       two_view_geometry.inlier_matches = matches;
-
-      std::cout << "l1735: " << matches.size() << std::endl;
 
       database_.WriteTwoViewGeometry(image1.ImageId(), image2.ImageId(),
                                      two_view_geometry);

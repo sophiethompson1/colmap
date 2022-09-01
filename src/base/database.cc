@@ -554,7 +554,7 @@ void Database::ReadTwoViewGeometries(
 
     const FeatureMatchesBlob blob = ReadDynamicMatrixBlob<FeatureMatchesBlob>(
         sql_stmt_read_two_view_geometries_, rc, 1);
-    std::cout << "Is it setting it here 557" << std::endl;
+    
     two_view_geometry.inlier_matches = FeatureMatchesFromBlob(blob);
 
     two_view_geometry.config = static_cast<int>(
@@ -669,17 +669,16 @@ image_t Database::WriteImage(const Image& image,
 }
 
 void Database::WriteKeypoints(const image_t image_id,
-                              const FeatureKeypoints& keypoints) const {
-  
-  uint32_t temp = 15;
+                              const FeatureKeypoints& keypoints, const int num_images) const {
+  int temp = 15;
   uint32_t new_id = image_id;
-  if (image_id > temp) {
+  if (temp != -1 && image_id > temp) {
     
     new_id = new_id % temp;
-    std::cout << "Bigger than 15" << new_id << std::endl;
+    std::cout << "Bigger than " << temp << " Setting to " << new_id << std::endl;
     if (new_id == 0) {
       new_id = temp;
-      std::cout << "It was 15 " << new_id << std::endl;
+      std::cout << "It was factor of " << temp << " Setting to " << new_id << std::endl;
     }
     const image_t nextone = new_id;
     AppendKeypoints(nextone, keypoints);
@@ -730,15 +729,15 @@ void Database::AppendKeypoints(const image_t image_id,
 }
 
 void Database::WriteDescriptors(const image_t image_id,
-                                const FeatureDescriptors& descriptors) const {
-  uint32_t temp = 15;
+                                const FeatureDescriptors& descriptors, const int num_images) const {
+  int temp = 15;
   uint32_t new_id = image_id;
-  if (image_id > temp) {
-    std::cout << "Bigger than 15" << std::endl;
+  if (temp != -1 && image_id > temp) {
+    std::cout << "Bigger than " << temp << " Setting to " << new_id << std::endl;
     new_id = new_id % temp;
     if (new_id == 0) {
       new_id = temp;
-      std::cout << "It was 15 " << new_id << std::endl;
+      std::cout << "It was factor of " << temp << " Setting to " << new_id << std::endl;
     }
     const image_t nextone = new_id;
     AppendDescriptors(nextone, descriptors);
@@ -818,7 +817,7 @@ void Database::WriteTwoViewGeometry(
     swapped_two_view_geometry->Invert();
     two_view_geometry_ptr = swapped_two_view_geometry.get();
   }
-  std::cout << "Is it setting here 817" << std::endl;
+
   const FeatureMatchesBlob inlier_matches =
       FeatureMatchesToBlob(two_view_geometry_ptr->inlier_matches);
   WriteDynamicMatrixBlob(sql_stmt_write_two_view_geometry_, inlier_matches, 2);
@@ -834,7 +833,7 @@ void Database::WriteTwoViewGeometry(
   const Eigen::Matrix3d Ht = two_view_geometry_ptr->H.transpose();
   const Eigen::Vector4d& qvec = two_view_geometry_ptr->qvec;
   const Eigen::Vector3d& tvec = two_view_geometry_ptr->tvec;
-  std::cout << "Is it setting here 833" << std::endl;
+  
   if (two_view_geometry_ptr->inlier_matches.size() > 0) {
     WriteStaticMatrixBlob(sql_stmt_write_two_view_geometry_, Ft, 6);
     WriteStaticMatrixBlob(sql_stmt_write_two_view_geometry_, Et, 7);
@@ -1434,7 +1433,6 @@ void Database::CreateMatchesTable() const {
 }
 
 void Database::CreateTwoViewGeometriesTable() const {
-  std::cout << "Creating 2 view geo 1433" << std::endl;
   if (ExistsTable("inlier_matches")) {
     SQLITE3_EXEC(database_,
                  "ALTER TABLE inlier_matches RENAME TO two_view_geometries;",

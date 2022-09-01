@@ -60,6 +60,9 @@ struct ImageReaderOptions {
   // of the images with respect to the image_path.
   std::vector<std::string> image_list;
 
+  // When to cap number of images (this should be equal to the number of simple RGB images)
+  int num_images = -1;
+  
   // Name of the camera model.
   std::string camera_model = "SIMPLE_RADIAL";
 

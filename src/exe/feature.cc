@@ -124,7 +124,7 @@ int RunFeatureExtractor(int argc, char** argv) {
     UpdateImageReaderOptionsFromCameraMode(reader_options,
                                            (CameraMode)camera_mode);
   }
-  std::cout << "In the Run Feature Extractor method " << std::endl; 
+   
   StringToLower(&descriptor_normalization);
   if (descriptor_normalization == "l1_root") {
     options.sift_extraction->normalization =

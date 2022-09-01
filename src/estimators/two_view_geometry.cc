@@ -53,7 +53,7 @@ namespace {
 FeatureMatches ExtractInlierMatches(const FeatureMatches& matches,
                                     const size_t num_inliers,
                                     const std::vector<char>& inlier_mask) {
-  std::cout << "extract inlier matches 56" << std::endl;
+  
   FeatureMatches inlier_matches(num_inliers);
   size_t j = 0;
   for (size_t i = 0; i < matches.size(); ++i) {
@@ -425,7 +425,6 @@ void TwoViewGeometry::EstimateUncalibrated(
     config = ConfigurationType::UNCALIBRATED;
   }
 
-  std::cout << "Uncalibrated 428" << std::endl;
   inlier_matches =
       ExtractInlierMatches(matches, num_inliers, *best_inlier_mask);
 

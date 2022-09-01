@@ -169,8 +169,6 @@ SiftFeatureExtractor::SiftFeatureExtractor(
 
   writer_.reset(new internal::FeatureWriterThread(
       image_reader_.NumImages(), &database_, writer_queue_.get()));
-  
-  std::cout << "Is this the end" << std::endl;
 }
 
 void SiftFeatureExtractor::Run() {
@@ -235,7 +233,6 @@ void SiftFeatureExtractor::Run() {
   writer_->Wait();
 
   GetTimer().PrintMinutes();
-  std::cout << "Maybe it is this" << std::endl;
 
 }
 

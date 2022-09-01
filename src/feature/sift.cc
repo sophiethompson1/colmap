@@ -1189,7 +1189,6 @@ void MatchSiftFeaturesGPU(const SiftMatchingOptions& match_options,
   } else {
     CHECK_LE(num_matches, matches->size());
     matches->resize(num_matches);
-    std::cout << "The number of matches " << num_matches << std::endl;
   }
 }
 
@@ -1200,7 +1199,7 @@ void MatchGuidedSiftFeaturesGPU(const SiftMatchingOptions& match_options,
                                 const FeatureDescriptors* descriptors2,
                                 SiftMatchGPU* sift_match_gpu,
                                 TwoViewGeometry* two_view_geometry) {
-  std::cout << "Gets to match guided sift GPU" << std::endl;
+  
   static_assert(offsetof(FeatureKeypoint, x) == 0 * sizeof(float),
                 "Invalid keypoint format");
   static_assert(offsetof(FeatureKeypoint, y) == 1 * sizeof(float),
