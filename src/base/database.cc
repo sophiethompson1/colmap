@@ -669,10 +669,10 @@ image_t Database::WriteImage(const Image& image,
 }
 
 void Database::WriteKeypoints(const image_t image_id,
-                              const FeatureKeypoints& keypoints, const int num_images) const {
-  int temp = 15;
+                              const FeatureKeypoints& keypoints) const {
+  int temp = num_images;
   uint32_t new_id = image_id;
-  if (temp != -1 && image_id > temp) {
+  if (image_id > temp) {
     
     new_id = new_id % temp;
     std::cout << "Bigger than " << temp << " Setting to " << new_id << std::endl;
@@ -729,10 +729,10 @@ void Database::AppendKeypoints(const image_t image_id,
 }
 
 void Database::WriteDescriptors(const image_t image_id,
-                                const FeatureDescriptors& descriptors, const int num_images) const {
-  int temp = 15;
+                                const FeatureDescriptors& descriptors) const {
+  int temp = num_images;
   uint32_t new_id = image_id;
-  if (temp != -1 && image_id > temp) {
+  if (image_id > temp) {
     std::cout << "Bigger than " << temp << " Setting to " << new_id << std::endl;
     new_id = new_id % temp;
     if (new_id == 0) {

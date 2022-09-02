@@ -90,6 +90,7 @@ SiftFeatureExtractor::SiftFeatureExtractor(
       image_reader_(reader_options_, &database_) {
   CHECK(reader_options_.Check());
   CHECK(sift_options_.Check());
+  database_.num_images = reader_options.num_images;
 
   std::shared_ptr<Bitmap> camera_mask;
   if (!reader_options_.camera_mask_path.empty()) {
@@ -166,7 +167,7 @@ SiftFeatureExtractor::SiftFeatureExtractor(
           writer_queue_.get()));
     }
   }
-
+  
   writer_.reset(new internal::FeatureWriterThread(
       image_reader_.NumImages(), &database_, writer_queue_.get()));
 }
@@ -291,8 +292,8 @@ void FeatureImporter::Run() {
       if (!database.ExistsDescriptors(image.ImageId())) {
         database.WriteDescriptors(image.ImageId(), descriptors);
       }
-      if (image.ImageId() > 15) {
-        std::cout << "Deleting camera and image stuff " << std::endl;
+      if (image.ImageId() > database.num_images) {
+        std::cout << "Deleting camera and image " << std::endl;
         if (image.ImageId() == image.CameraId()) {
           database.DeleteCamera(image.CameraId());
         }
@@ -527,8 +528,8 @@ void FeatureWriterThread::Run() {
                                     image_data.descriptors);
       }
 
-      if (image_data.image.ImageId() > 15) {
-        std::cout << "Deleting camera and image stuff " << std::endl;
+      if (image_data.image.ImageId() > database_->num_images) {
+        std::cout << "Deleting camera and image" << std::endl;
         const image_t imgId = image_data.image.ImageId();
         const camera_t camId = image_data.image.ImageId();
         if (imgId == camId) {
